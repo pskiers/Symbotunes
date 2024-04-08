@@ -1,5 +1,7 @@
 name: wimu
 channels:
+  - pytorch
+  - nvidia
   - conda-forge
   - defaults
 dependencies:
@@ -13,10 +15,18 @@ dependencies:
   - brotli-python=1.0.9=py312h6a678d5_7
   - bzip2=1.0.8=h5eee18b_5
   - ca-certificates=2024.3.11=h06a4308_0
-  - certifi=2024.2.2=py312h06a4308_0
+  - certifi=2024.2.2=pyhd8ed1ab_0
   - cffi=1.16.0=py312h5eee18b_0
   - charset-normalizer=2.0.4=pyhd3eb1b0_0
+  - colorama=0.4.6=pyhd8ed1ab_0
   - contourpy=1.2.0=py312hdb19cb5_0
+  - cuda-cudart=12.1.105=0
+  - cuda-cupti=12.1.105=0
+  - cuda-libraries=12.1.0=0
+  - cuda-nvrtc=12.1.105=0
+  - cuda-nvtx=12.1.105=0
+  - cuda-opencl=12.4.127=0
+  - cuda-runtime=12.1.0=0
   - cycler=0.11.0=pyhd3eb1b0_0
   - cyrus-sasl=2.1.28=h52b45da_1
   - dbus=1.13.18=hb2f20db_0
@@ -53,7 +63,13 @@ dependencies:
   - libbrotlienc=1.0.9=h5eee18b_7
   - libclang=14.0.6=default_hc6dbbc7_1
   - libclang13=14.0.6=default_he11475f_1
+  - libcublas=12.1.0.26=0
+  - libcufft=11.0.2.4=0
+  - libcufile=1.9.1.3=0
   - libcups=2.4.2=h2d74bed_1
+  - libcurand=10.3.5.147=0
+  - libcusolver=11.4.4.55=0
+  - libcusparse=12.0.2.55=0
   - libdeflate=1.17=h5eee18b_1
   - libedit=3.1.20230828=h5eee18b_0
   - libexpat=2.5.0=hcb278e6_1
@@ -66,8 +82,12 @@ dependencies:
   - libgomp=13.2.0=h807b86a_5
   - libiconv=1.16=h7f8727e_2
   - libidn2=2.3.4=h5eee18b_0
+  - libjpeg-turbo=2.0.0=h9bf148f_0
   - libllvm14=14.0.6=hdb19cb5_3
+  - libnpp=12.0.2.50=0
   - libnsl=2.0.1=hd590300_0
+  - libnvjitlink=12.1.105=0
+  - libnvjpeg=12.1.1.14=0
   - libogg=1.3.5=h27cfd23_1
   - libopus=1.3.1=h7b6447c_0
   - libpng=1.6.39=h5eee18b_0
@@ -89,6 +109,9 @@ dependencies:
   - libxkbcommon=1.0.1=hfa300c1_0
   - libxml2=2.9.14=h74e7548_0
   - libzlib=1.2.13=hd590300_5
+  - lightning=2.2.1=pyhd8ed1ab_0
+  - lightning-utilities=0.11.2=pyhd8ed1ab_0
+  - llvm-openmp=14.0.6=h9e868ea_0
   - llvmlite=0.42.0=py312h6a678d5_0
   - lz4-c=1.9.4=h6a678d5_0
   - markupsafe=2.1.3=py312h5eee18b_0
@@ -133,8 +156,12 @@ dependencies:
   - python-dateutil=2.8.2=pyhd3eb1b0_0
   - python-tzdata=2023.3=pyhd3eb1b0_0
   - python_abi=3.12=4_cp312
-  - pytorch=2.2.0=cpu_py312hb9e5694_0
+  - pytorch=2.2.2=py3.12_cuda12.1_cudnn8.9.2_0
+  - pytorch-cuda=12.1=ha16c6d3_5
+  - pytorch-lightning=2.2.1=pyhd8ed1ab_0
+  - pytorch-mutex=1.0=cuda
   - pytz=2023.3.post1=py312h06a4308_0
+  - pyyaml=6.0.1=py312h5eee18b_0
   - qt-main=5.15.2=h7358343_9
   - readline=8.2=h5eee18b_0
   - requests=2.31.0=py312h06a4308_1
@@ -151,13 +178,18 @@ dependencies:
   - tbb=2021.8.0=hdb19cb5_0
   - threadpoolctl=2.2.0=pyh0d69192_0
   - tk=8.6.13=noxft_h4845f30_101
+  - torchaudio=2.2.2=py312_cu121
+  - torchmetrics=1.3.2=pyhd8ed1ab_0
+  - torchvision=0.17.2=py312_cu121
   - tornado=6.3.3=py312h5eee18b_0
+  - tqdm=4.66.2=pyhd8ed1ab_0
+  - typing-extensions=4.9.0=py312h06a4308_1
   - typing_extensions=4.9.0=py312h06a4308_1
   - tzdata=2024a=h04d1e81_0
   - urllib3=2.1.0=py312h06a4308_1
   - wheel=0.41.2=py312h06a4308_0
   - x264=1!157.20191217=h7b6447c_0
   - xz=5.4.6=h5eee18b_0
+  - yaml=0.2.5=h7b6447c_0
   - zlib=1.2.13=hd590300_5
   - zstd=1.5.5=hc292b87_0
-prefix: /home/maks/miniconda3/envs/wimu
