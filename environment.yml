@@ -193,3 +193,6 @@ dependencies:
   - yaml=0.2.5=h7b6447c_0
   - zlib=1.2.13=hd590300_5
   - zstd=1.5.5=hc292b87_0
+  - pip:
+      - antlr4-python3-runtime==4.9.3
+      - omegaconf==2.3.0
