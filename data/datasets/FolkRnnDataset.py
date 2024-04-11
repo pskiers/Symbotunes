@@ -16,6 +16,7 @@ class FolkRnnDataset(BaseDataset):
         self,
         root: str = "_data",
         split: str = "train",
+        data_type: str = "tokenized_ABC",
         transform: Callable | None = None,
         target_transform: Callable | None = None,
         preload: bool = True,
@@ -23,8 +24,13 @@ class FolkRnnDataset(BaseDataset):
     ) -> None:
         super().__init__(root, split, False, transform, target_transform, **kwargs)
         
-        self.file_list = glob.glob(os.path.join(root, '*.mid'))
-        self.pipeline = Pipeline(type='midi')
+        self.data_type = data_type
+        if data_type == 'midi':
+            self.file_list = glob.glob(os.path.join(self.root, '*.mid'))
+            self.pipeline = Pipeline(type='midi')
+        elif data_type == 'tokenized_ABC':
+            self.data_file = os.path.join(self.root, 'train/data_v2.txt')
+            self.pipeline = Pipeline(type='tok_ABC')
 
         self._data = []
         self._targets = []
@@ -35,9 +41,12 @@ class FolkRnnDataset(BaseDataset):
     def _load_data(self):
         self._data = []
         # self._targets = []
-        for midi_path in self.file_list:
-            midi_data = self.pipeline.process(midi_path)
-            self._data.append(midi_data)
+        if self.data_type == 'midi':
+            for midi_path in self.file_list:
+                midi_data = self.pipeline.process(midi_path)
+                self._data.append(midi_data)
+        elif self.data_type == 'tokenized_ABC':
+            self._data = self.pipeline.process(self.data_file)
             # handle targets
 
     def __getitem__(self, index: int) -> tuple:
@@ -47,7 +56,7 @@ class FolkRnnDataset(BaseDataset):
         if self.transform:
             midi_data = self.transform(midi_data)
         # if self.target_transform:
-        #     target = self.target_transform(target)
+        #     target = self.target_transform(target)9
 
         return midi_data
 
