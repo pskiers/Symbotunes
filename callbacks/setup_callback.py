@@ -1,13 +1,23 @@
 import os
+import datetime
 from pytorch_lightning.callbacks import Callback
 from omegaconf import OmegaConf
 
 
 class SetupCallback(Callback):
-    def __init__(self, resume, now, logdir, ckptdir, cfgdir, config, lightning_config, dl_config):
+    def __init__(
+        self,
+        resume: bool,
+        logdir: str,
+        ckptdir: str,
+        cfgdir: str,
+        config: OmegaConf,
+        lightning_config: OmegaConf,
+        dl_config: OmegaConf,
+    ):
         super().__init__()
         self.resume = resume
-        self.now = now
+        self.now = datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
         self.logdir = logdir
         self.ckptdir = ckptdir
         self.cfgdir = cfgdir
