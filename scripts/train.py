@@ -32,7 +32,7 @@ if __name__ == "__main__":
     lightning_config = config.pop("lightning", OmegaConf.create())
 
     trainer_config = lightning_config.get("trainer", OmegaConf.create())
-    trainer_opt = argparse.Namespace(**trainer_config)
+    trainer_opt = OmegaConf.to_container(trainer_config)
     lightning_config.trainer = trainer_config
 
     dl_config_orig = config.pop("dataloaders")
@@ -57,9 +57,9 @@ if __name__ == "__main__":
     )
 
     callback_cfg = config.get("callbacks", OmegaConf.create())
-    trainer_kwargs["callbacks"] = get_callbacks(config)
+    trainer_kwargs["callbacks"] = get_callbacks(config.callbacks)
 
-    trainer = pl.Trainer.from_argparse_args(trainer_opt, **trainer_kwargs)
+    trainer = pl.Trainer(**trainer_opt, **trainer_kwargs)
 
     trainer.fit(
         model,
