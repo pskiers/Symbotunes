@@ -20,11 +20,12 @@ class FolkRnnDataset(BaseDataset):
         transform: Callable | None = None,
         target_transform: Callable | None = None,
         preload: bool = True,
+        download: bool = True,
         ** kwargs
     ) -> None:
-        super().__init__(root, split, False, transform, target_transform, **kwargs)
-        
         self.data_type = data_type
+        super().__init__(root, split, download, transform, target_transform, **kwargs)
+        
         if data_type == 'midi':
             self.file_list = glob.glob(os.path.join(self.root, '*.mid'))
             self.pipeline = Pipeline(type='midi')
@@ -64,4 +65,12 @@ class FolkRnnDataset(BaseDataset):
         return len(self._data)
 
     def download(self) -> None:
-        pass
+        if self.data_type == 'tokenized_ABC':
+            self.url = 'https://raw.githubusercontent.com/IraKorshunova/folk-rnn/master/data/data_v2'
+
+            response = requests.get(self.url)
+
+            if response.status_code == 200:
+                dest_path = os.path.join(self.root, 'train',)
+                with open(os.path.join(dest_path, 'data_v2.txt'), 'wb') as file:
+                    file.write(response.content)
