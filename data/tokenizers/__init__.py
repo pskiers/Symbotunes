@@ -1,3 +1,1 @@
-def get_tokenizer(name: str, confg: dict):
-    # TODO
-    raise NotImplementedError
+from .folk_tokenizer import FolkTokenizer
