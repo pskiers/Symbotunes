@@ -149,7 +149,7 @@ dependencies:
   - pycparser=2.21=pyhd3eb1b0_0
   - pyparsing=3.0.9=py312h06a4308_0
   - pyqt=5.15.10=py312h6a678d5_0
-  - pyqt5-sip=12.13.0=py312h5eee18b_0
+  - pyqt5-sip=12.13.0=py312h5eee18b_0 
   - pysocks=1.7.1=py312h06a4308_0
   - pysoundfile=0.12.1=pyhd8ed1ab_0
   - python=3.12.2=hab00c5b_0_cpython
@@ -195,4 +195,9 @@ dependencies:
   - zstd=1.5.5=hc292b87_0
   - pip:
       - antlr4-python3-runtime==4.9.3
+      - huggingface-hub==0.22.2
+      - miditok==3.0.2
       - omegaconf==2.3.0
+      - pysmartdl==1.3.4
+      - symusic==0.4.4
+      - tokenizers==0.15.2
