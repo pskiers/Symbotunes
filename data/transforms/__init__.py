@@ -3,6 +3,7 @@ from torchvision import transforms
 from .folk_rnn import FolkTransform
 
 
+# fmt: off
 def get_transform(kwargs: dict | list) -> Callable:
     if isinstance(kwargs, list):
         return transforms.Compose(
@@ -10,6 +11,7 @@ def get_transform(kwargs: dict | list) -> Callable:
         )
     else:
         return transforms.Compose([parse_transform(n, k) for n, k in kwargs.items()])
+# fmt: on
 
 
 def parse_transform(name: str, kwargs: dict) -> Callable:

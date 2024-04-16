@@ -14,9 +14,7 @@ if __name__ == "__main__":
     environ["WANDB__SERVICE_WAIT"] = "300"
 
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--path", "-p", type=Path, required=True, help="path to config file"
-    )
+    parser.add_argument("--path", "-p", type=Path, required=True, help="path to config file")
     parser.add_argument(
         "--checkpoint",
         "-c",
@@ -42,9 +40,7 @@ if __name__ == "__main__":
     if checkpoint_path is not None:
         config.model.params["ckpt_path"] = checkpoint_path
 
-    model = get_model(
-        config.model.get("model_type"), config.model.get("params", dict())
-    )
+    model = get_model(config.model.get("model_type"), config.model.get("params", dict()))
 
     now = datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
     nowname = model.__class__.__name__ + "_" + now
@@ -52,9 +48,7 @@ if __name__ == "__main__":
     trainer_kwargs = dict()
 
     tags = []
-    trainer_kwargs["logger"] = pl.loggers.WandbLogger(
-        name=nowname, id=nowname, tags=tags
-    )
+    trainer_kwargs["logger"] = pl.loggers.WandbLogger(name=nowname, id=nowname, tags=tags)
 
     callback_cfg = config.get("callbacks", OmegaConf.create())
     trainer_kwargs["callbacks"] = get_callbacks(config.callbacks)

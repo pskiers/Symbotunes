@@ -19,7 +19,7 @@ class FolkRNN(pl.LightningModule):
         lr: float = 0.003,
         lr_decay: float = 0.97,
         lr_decay_start: int = 20,
-        max_sequence_length = 100,
+        max_sequence_length=100,
         *args: torch.Any,
         **kwargs: torch.Any
     ) -> None:
@@ -78,6 +78,7 @@ class FolkRNN(pl.LightningModule):
         self.log("val/loss", loss, prog_bar=True, logger=True, on_step=False, on_epoch=True)
         return loss
 
+    # fmt: off
     def configure_optimizers(self):
         optimizer = RMSprop(params=self.parameters(), lr=self.lr)
         scheduler = LambdaLR(
@@ -89,3 +90,4 @@ class FolkRNN(pl.LightningModule):
             ),
         )
         return {'optimizer': optimizer, 'lr_scheduler': scheduler}
+    # fmt: on
