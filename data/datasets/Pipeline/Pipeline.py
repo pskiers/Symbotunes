@@ -1,4 +1,4 @@
-from pretty_midi import PrettyMIDI
+from pretty_midi import PrettyMIDI  # type: ignore[import]
 
 
 class Pipeline:

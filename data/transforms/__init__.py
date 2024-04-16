@@ -1,5 +1,5 @@
 from typing import Callable
-from torchvision import transforms
+from torchvision import transforms  # type: ignore[import]
 from .folk_rnn import FolkTransform
 
 
