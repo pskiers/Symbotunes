@@ -7,6 +7,7 @@ jobs:
   pre-commit:
     name: pre-commit
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -17,8 +18,13 @@ jobs:
           python-version: 3.12
 
       - name: Install dependencies
-        run: pip install black
-
+        run: |
+          pip install black
+          pip install mypy
+      
       - name: Run Linter
         run: black --check . --line-length 120
+
+      - name: Run Type checker
+        run: mypy .
 
