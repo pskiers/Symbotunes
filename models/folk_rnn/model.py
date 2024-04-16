@@ -78,6 +78,7 @@ class FolkRNN(pl.LightningModule):
         self.log("val/loss", loss, prog_bar=True, logger=True, on_step=False, on_epoch=True)
         return loss
 
+    # fmt: off
     def configure_optimizers(self):
         optimizer = RMSprop(params=self.parameters(), lr=self.lr)
         scheduler = LambdaLR(
@@ -89,3 +90,4 @@ class FolkRNN(pl.LightningModule):
             ),
         )
         return {'optimizer': optimizer, 'lr_scheduler': scheduler}
+    # fmt: on
