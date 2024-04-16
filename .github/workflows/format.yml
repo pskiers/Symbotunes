@@ -27,5 +27,5 @@ jobs:
         run: black --check . --line-length 120
 
       - name: Run Type checker
-        run: mypy . --ignore-missing-imports
+        run: mypy --ignore-missing-imports .
 
