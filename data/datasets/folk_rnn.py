@@ -34,8 +34,8 @@ class FolkRnnDataset(BaseDataset):
             self.data_file = os.path.join(self.root, "train/data_v2.txt")
             self.pipeline = Pipeline(type="tok_ABC")
 
-        self.data = []
-        self.targets = []
+        self.data = []  # type: ignore[assignment]
+        self.targets = []  # type: ignore[assignment]
 
         if preload:
             self._load_data()
@@ -60,7 +60,7 @@ class FolkRnnDataset(BaseDataset):
         # if self.target_transform:
         #     target = self.target_transform(target)9
 
-        return midi_data
+        return midi_data  # type: ignore[return-value]
 
     def __len__(self) -> int:
         return len(self.data)
