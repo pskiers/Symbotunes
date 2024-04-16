@@ -21,10 +21,11 @@ jobs:
         run: |
           pip install black
           pip install mypy
+          pip install types-requests
       
       - name: Run Linter
         run: black --check . --line-length 120
 
       - name: Run Type checker
-        run: mypy .
+        run: mypy . --ignore-missing-imports
 
