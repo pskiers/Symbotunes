@@ -1,5 +1,4 @@
 import os
-import datetime
 from pytorch_lightning.callbacks import Callback
 from omegaconf import OmegaConf
 
@@ -7,31 +6,34 @@ from omegaconf import OmegaConf
 class SetupCallback(Callback):
     def __init__(
         self,
-        resume: bool,
-        logdir: str,
-        ckptdir: str,
-        cfgdir: str,
+        nowname: str,
         config: OmegaConf,
         lightning_config: OmegaConf,
         dl_config: OmegaConf,
+        resume: bool = False,
+        logdir: str = "logs",
     ):
         super().__init__()
         self.resume = resume
-        self.now = datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
-        self.logdir = logdir
-        self.ckptdir = ckptdir
-        self.cfgdir = cfgdir
+        self.nowname = nowname
+        self.logdir = os.path.join(logdir, nowname)
+        self.ckptdir = os.path.join(self.logdir, "checkpoints")
+        self.cfgdir = os.path.join(self.logdir, "configs")
         self.config = config
         self.lightning_config = lightning_config
         self.dl_config = dl_config
 
-    def on_keyboard_interrupt(self, trainer, pl_module):
-        if trainer.global_rank == 0:
-            print("Summoning checkpoint.")
-            ckpt_path = os.path.join(self.ckptdir, "last.ckpt")
-            trainer.save_checkpoint(ckpt_path)
+    def on_exception(self, trainer, pl_module, exception):
+        match exception:
+            case KeyboardInterrupt():
+                if trainer.global_rank == 0:
+                    print("Summoning checkpoint.")
+                    ckpt_path = os.path.join(self.ckptdir, "last.ckpt")
+                    trainer.save_checkpoint(ckpt_path)
+            case _:
+                raise exception
 
-    def on_pretrain_routine_start(self, trainer, pl_module):
+    def setup(self, trainer, pl_module, stage):
         if trainer.global_rank == 0:
             # Create logdirs and save configs
             os.makedirs(self.logdir, exist_ok=True)
@@ -48,20 +50,20 @@ class SetupCallback(Callback):
             print(OmegaConf.to_yaml(self.config))
             OmegaConf.save(
                 self.config,
-                os.path.join(self.cfgdir, "{}-project.yaml".format(self.now)),
+                os.path.join(self.cfgdir, "project.yaml"),
             )
 
             print("Lightning config")
             print(OmegaConf.to_yaml(self.dl_config))
             OmegaConf.save(
                 OmegaConf.create({"lightning": self.dl_config}),
-                os.path.join(self.cfgdir, "{}-lightning.yaml".format(self.now)),
+                os.path.join(self.cfgdir, "lightning.yaml"),
             )
             print("Dataloading config")
             print(OmegaConf.to_yaml(self.dl_config))
             OmegaConf.save(
                 OmegaConf.create({"dataloading": self.dl_config}),
-                os.path.join(self.cfgdir, "{}-dataloading.yaml".format(self.now)),
+                os.path.join(self.cfgdir, "dataloading.yaml"),
             )
 
         else:
