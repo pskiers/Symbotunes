@@ -30,7 +30,7 @@ dataloaders:
         name: "folk-rnn"
         root: "_data"
         split: "train"
-        download: True
+        download: False
         data_type: "tokenized_ABC"
         transforms:
           - folk_rnn:
@@ -41,13 +41,17 @@ dataloaders:
 
 lightning:
   trainer:
-    # gpus: -1
     benchmark: True
-    # checkpoint_callback: True
     max_steps: 100000
 
 callbacks:
+  - model_checkpoint:
+      filename: "{epoch:06}"
+      verbose: True
+      save_last: True
   - checkpoint_every_n_steps:
       save_step_frequency: 1000
       prefix: "N-Step-Checkpoint"
       use_modelcheckpoint_filename: False
+  - setup_callback:
+  - cuda_callback:
