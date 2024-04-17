@@ -1,6 +1,7 @@
 from omegaconf import OmegaConf
 import argparse
 import pytorch_lightning as pl
+from pytorch_lightning.loggers import WandbLogger
 from os import environ
 from pathlib import Path
 import datetime
@@ -14,7 +15,9 @@ if __name__ == "__main__":
     environ["WANDB__SERVICE_WAIT"] = "300"
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--path", "-p", type=Path, required=True, help="path to config file")
+    parser.add_argument(
+        "--path", "-p", type=Path, required=True, help="path to config file"
+    )
     parser.add_argument(
         "--checkpoint",
         "-c",
@@ -30,7 +33,7 @@ if __name__ == "__main__":
     lightning_config = config.pop("lightning", OmegaConf.create())  # type: ignore[call-arg, arg-type]
 
     trainer_config = lightning_config.get("trainer", OmegaConf.create())
-    trainer_opt = OmegaConf.to_container(trainer_config)
+    trainer_kwargs = OmegaConf.to_container(trainer_config)
     lightning_config.trainer = trainer_config
 
     dl_config_orig = config.pop("dataloaders")  # type: ignore[arg-type]
@@ -40,20 +43,27 @@ if __name__ == "__main__":
     if checkpoint_path is not None:
         config.model.params["ckpt_path"] = checkpoint_path
 
-    model = get_model(config.model.get("model_type"), config.model.get("params", dict()))
+    model = get_model(
+        config.model.get("model_type"), config.model.get("params", dict())
+    )
 
     now = datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
     nowname = model.__class__.__name__ + "_" + now
-
-    trainer_kwargs = dict()
+    common_callbacks_kwargs = {
+        "nowname": nowname,
+        "config": config,
+        "lightning_config": lightning_config,
+        "dl_config": dl_config,
+    }
 
     tags = []  # type: ignore[var-annotated]
-    trainer_kwargs["logger"] = pl.loggers.WandbLogger(name=nowname, id=nowname, tags=tags)
-
+    trainer_kwargs["logger"] = WandbLogger(  # type: ignore
+        name=nowname, id=nowname, tags=tags, project="Symbotunes"
+    )
     callback_cfg = config.get("callbacks", OmegaConf.create())  # type: ignore[arg-type]
-    trainer_kwargs["callbacks"] = get_callbacks(config.callbacks)  # type: ignore[assignment]
+    trainer_kwargs["callbacks"] = get_callbacks(config.callbacks, common_callbacks_kwargs)  # type: ignore
 
-    trainer = pl.Trainer(**trainer_opt, **trainer_kwargs)  # type: ignore[arg-type]
+    trainer = pl.Trainer(**trainer_kwargs)  # type: ignore[arg-type]
 
     trainer.fit(
         model,
