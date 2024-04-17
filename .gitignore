@@ -1,7 +1,7 @@
 # Repo specific
 _data
 wandb
-lightning_logs
+logs
 
 # vscode
 .vscode
