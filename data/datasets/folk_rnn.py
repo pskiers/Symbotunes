@@ -3,8 +3,8 @@ import glob
 import requests
 from typing import Callable
 
-from .Pipeline.Pipeline import Pipeline
-from .base import BaseDataset
+from Pipeline.Pipeline import Pipeline
+from base import BaseDataset
 
 
 class FolkRnnDataset(BaseDataset):
@@ -28,12 +28,11 @@ class FolkRnnDataset(BaseDataset):
         super().__init__(root, split, download, transform, target_transform, **kwargs)
 
         if data_type == "midi":
-            self.file_list = glob.glob(os.path.join(self.root, "*.mid"))
-            self.pipeline = Pipeline(type="midi")
+            self.file_list = glob.glob(os.path.join(os.path.join(self.root, "session_test"),"*.mid"))
         elif data_type == "tokenized_ABC":
             self.data_file = os.path.join(self.root, "train/data_v2.txt")
-            self.pipeline = Pipeline(type="tok_ABC")
 
+        self.pipeline = Pipeline(config_path='../../models/folk_rnn/config.yaml', model_name='folk_rnn')
         self.data = []
         self.targets = []
 
@@ -58,7 +57,7 @@ class FolkRnnDataset(BaseDataset):
         if self.transform:
             midi_data = self.transform(midi_data)
         # if self.target_transform:
-        #     target = self.target_transform(target)9
+        #     target = self.target_transform(target)
 
         return midi_data
 

@@ -20,7 +20,7 @@ dataloaders:
     data_type: "tokenized_ABC"
     transforms:
       - folk_rnn:
-          sequence_size: 40
+          - LoadTokABC:
     
     batch_size: 64
     num_workers: 16
@@ -34,7 +34,7 @@ dataloaders:
         data_type: "tokenized_ABC"
         transforms:
           - folk_rnn:
-              sequence_size: 40
+            - sequence_size: 40
         
         batch_size: 64
         num_workers: 16
