@@ -29,7 +29,6 @@ class BaseDataset(data.Dataset, ABC):
         self._transform = transform
 
         self._data: torch.Tensor | np.ndarray
-        self._targets: torch.Tensor | np.ndarray
 
     @property
     def data(self) -> torch.Tensor | np.ndarray:
@@ -40,14 +39,6 @@ class BaseDataset(data.Dataset, ABC):
         self._data = data
 
     @property
-    def targets(self) -> torch.Tensor | np.ndarray:
-        return self._targets
-
-    @targets.setter
-    def targets(self, targets: torch.Tensor | np.ndarray) -> None:
-        self._targets = targets
-
-    @property
     def transform(self) -> Callable | None:
         return self._transform
 
@@ -55,14 +46,13 @@ class BaseDataset(data.Dataset, ABC):
     def transform(self, transform: Callable) -> None:
         self._transform = transform
 
-    def __getitem__(self, index) -> tuple:
+    def __getitem__(self, index) -> torch.Tensor | np.ndarray:
         data = self.data[index]
-        target = self.targets[index]
 
         if self.transform is not None:
             data = self.transform(data)
 
-        return data, target
+        return data
 
     def __len__(self) -> int:
         return len(self.data)
