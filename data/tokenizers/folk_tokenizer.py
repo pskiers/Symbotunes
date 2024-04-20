@@ -1,4 +1,4 @@
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import OneHotEncoder  # type: ignore[import]
 import numpy as np
 
 

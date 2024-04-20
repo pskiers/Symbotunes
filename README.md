@@ -8,7 +8,12 @@ The following command can be used to create the environment from file:
 conda env create --name wimu --file environment.yml
 ```
 
-This environment may then be activated with
+This environment may then be activated with:
 ```sh
 conda activate wimu
+```
+
+If the environment is changed by the user, then it should be updated with:
+```sh
+conda env export --name wimu | grep -v "prefix: " > environment.yml
 ```
