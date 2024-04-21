@@ -1,7 +1,7 @@
 model:
   model_type: folk-rnn
   params:
-    vocab_size: 135
+    vocab_size: 137
     num_layers: 3
     lstm_size: 512
     dropout: 0.5
@@ -20,10 +20,10 @@ dataloaders:
     data_type: "tokenized_ABC"
     transforms:
       - folk_rnn:
-          sequence_size: 40
     
     batch_size: 64
     num_workers: 16
+    collate_fn: "pad_collate_single_sequence"
 
   train:
     - dataset:
@@ -34,15 +34,17 @@ dataloaders:
         data_type: "tokenized_ABC"
         transforms:
           - folk_rnn:
-              sequence_size: 40
         
         batch_size: 64
         num_workers: 16
+        collate_fn: "pad_collate_single_sequence"
 
 lightning:
   trainer:
     benchmark: True
-    max_steps: 100000
+    max_epochs: 100
+    gradient_clip_algorithm: "value"
+    gradient_clip_val: 5
 
 callbacks:
   - model_checkpoint:
