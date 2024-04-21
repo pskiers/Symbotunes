@@ -1,5 +1,4 @@
-from sklearn.preprocessing import OneHotEncoder  # type: ignore[import]
-import numpy as np
+import torch
 
 
 class FolkTokenizer:
@@ -142,12 +141,12 @@ class FolkTokenizer:
     ]
 
     def __init__(self) -> None:
-        self.encoder = OneHotEncoder(categories=[self.tokens], sparse_output=False)
+        self.token2idx = {token: idx for token, idx in zip(self.tokens, range(len(self.tokens)))}
+        self.start_token = len(self.tokens)
+        self.end_token = len(self.tokens) + 1
 
     def __call__(self, data: str):
-        # TODO HOE should account for 2 additional tokens <s> and </s> (see Sturm et al.)
-        split_str = data.split()
-        split_data = np.array(split_str).reshape(-1, 1)
-        self.encoder.fit(split_data)
-        encoded_categories = self.encoder.transform(split_data)
-        return encoded_categories
+        tunes = [self.start_token]
+        tunes.extend([self.token2idx[token] for token in data.split()])
+        tunes.append(self.end_token)
+        return torch.tensor(tunes)
