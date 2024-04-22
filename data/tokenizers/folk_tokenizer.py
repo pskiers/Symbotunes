@@ -141,12 +141,12 @@ class FolkTokenizer:
     ]
 
     def __init__(self) -> None:
-        self.token2idx = {token: idx for token, idx in zip(self.tokens, range(len(self.tokens)))}
+        self.token2idx = {token: idx for idx, token in enumerate(self.tokens)}
         self.start_token = len(self.tokens)
         self.end_token = len(self.tokens) + 1
 
     def __call__(self, data: str):
         tunes = [self.start_token]
-        tunes.extend([self.token2idx[token] for token in data.split()])
+        tunes += [self.token2idx[token] for token in data.split()]
         tunes.append(self.end_token)
         return torch.tensor(tunes)
