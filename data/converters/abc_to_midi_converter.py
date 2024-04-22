@@ -1,20 +1,12 @@
 from typing import List
-import numpy as np
-from sklearn.preprocessing import OneHotEncoder  # type: ignore[import]
 from music21 import converter
 
 
-class OneHotToMidiConverter:
-    def __init__(self, tokens, resolution=480, tempo=500000):
+class ABCTOMidiConverter:
+    def __init__(self, tokenizer, resolution=480, tempo=500000):
         self.resolution = resolution
         self.tempo = tempo
-        self.encoder = OneHotEncoder(categories=[tokens], sparse_output=False)
-        reshaped_tokens = np.array(tokens).reshape(-1, 1)
-        self.encoder.fit(reshaped_tokens)
-
-    def _convert_ohc_to_str_list(self, input_notes):
-        track_notes = self.encoder.inverse_transform(input_notes)
-        return [item for sublist in track_notes for item in sublist]
+        self.encoder = tokenizer
 
     def _reformat_notes(self, notes: List[str]):
         notes.insert(1, "L: 1/8")
@@ -28,7 +20,7 @@ class OneHotToMidiConverter:
         stream.write("midi", fp=filename)
 
     def __call__(self, encodings, filename="output.mid"):
-        notes = self._convert_ohc_to_str_list(encodings)
+        notes = self.encoder.inverse_transform(encodings)
 
         assert notes[0][0] == "M"
         assert notes[1][0] == "K"
