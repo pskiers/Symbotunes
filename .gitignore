@@ -2,6 +2,7 @@
 _data
 wandb
 logs
+samples
 
 # vscode
 .vscode
