@@ -6,10 +6,9 @@ model:
     lstm_size: 512
     dropout: 0.5
     embedding_size: null
-    lr: 0.003
+    lr: 0.002
     lr_decay: 0.97
     lr_decay_start: 20
-    max_sequence_length: 100
 
 dataloaders:
   validation:
