@@ -36,17 +36,16 @@ if __name__ == "__main__":
 
     samples = model.sample(batch_size)
 
-    # TODO handle other tokenizers. Maybe read the what tokenizer should be used from config somehow. Otherwise, if 
-    # getting tokenizer type from config file is ugly then either add argument to argparser, or even add the 
+    # TODO handle other tokenizers. Maybe read the what tokenizer should be used from config somehow. Otherwise, if
+    # getting tokenizer type from config file is ugly then either add argument to argparser, or even add the
     # converter to config file. Or maybe do something else entirely, I dunno.
     tokenizer = FolkTokenizer()
     converter = ABCTOMidiConverter(tokenizer)
 
     if not os.path.exists(out_path):
-        os.makedirs(out_path,)
+        os.makedirs(out_path)
     for i, sample in enumerate(samples):
         try:
             converter(sample.cpu(), os.path.join(out_path, f"sample_{i}.mid"))
         except Exception:
             print(f"Invalid format of sample {i}")
-
