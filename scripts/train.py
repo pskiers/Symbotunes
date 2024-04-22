@@ -38,10 +38,11 @@ if __name__ == "__main__":
     dl_config = OmegaConf.to_container(dl_config_orig, resolve=True)
     train_dls, test_dl = get_dataloaders(dl_config)  # type: ignore[arg-type]
 
+    model_type = get_model(config.model.get("model_type"))
     if checkpoint_path is not None:
-        config.model.params["ckpt_path"] = checkpoint_path
-
-    model = get_model(config.model.get("model_type"), config.model.get("params", dict()))
+        model = model_type.load_from_checkpoint(checkpoint_path, **config.model.get("params", dict()))
+    else:
+        model = model_type(**config.model.get("params", dict()))
 
     now = datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
     nowname = model.__class__.__name__ + "_" + now
