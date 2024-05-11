@@ -16,9 +16,7 @@ class MidiToPianoroll:
         return pypianoroll.from_pretty_midi(midi)
 
     @staticmethod
-    def plot(
-        pianoroll: pypianoroll.Multitrack, save_path: str, number_of_beats: int = -1
-    ):
+    def plot(pianoroll: pypianoroll.Multitrack, save_path: str, number_of_beats: int = -1):
         """
         Visualise the pianoroll with matplotlib. 4 tracks or less are optimal
         Args:
