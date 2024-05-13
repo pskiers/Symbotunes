@@ -23,6 +23,10 @@ class BaseDataset(data.Dataset, ABC):
         super().__init__()
         self.root = root
         self.split = split
+        self.train_size = 0.8
+        self.val_size = 0.1
+        self.test_size = 0.1
+        self.random_state = 42
         if download:
             self.download()
 

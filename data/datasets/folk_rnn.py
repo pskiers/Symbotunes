@@ -2,6 +2,7 @@ import os
 import requests
 from typing import Callable
 import numpy as np
+from sklearn.model_selection import train_test_split
 
 from .base import BaseDataset
 
@@ -30,9 +31,25 @@ class FolkRnnDataset(BaseDataset):
         if data_type == "tokenized_ABC":
             self.data_file = os.path.join(self.root, "train", "data_v2.txt")
             with open(self.data_file, "r", encoding="utf-8") as file:
-                self.data = np.array(file.read().split("\n\n"))
+                full_data = np.array(file.read().split("\n\n"))
+                
+            self.data = self.split_data(full_data, split)
+
         else:
             raise ValueError(f"{data_type} is not an allowed data type for this dataset")
+
+    def split_data(self, data: np.ndarray, split: str) -> np.ndarray:
+        train_data, temp_data = train_test_split(data, train_size=self.train_size, shuffle=True, random_state=self.random_state)
+        val_data, test_data = train_test_split(temp_data, test_size=self.test_size/(self.test_size + self.val_size), shuffle=True, random_state=self.random_state)
+
+        if split == "train":
+            return train_data
+        elif split == "val":
+            return val_data
+        elif split == "test":
+            return test_data
+        else:
+            raise ValueError(f"Invalid split name: {split}. Expected one of ['train', 'val', 'test']")
 
     def download(self) -> None:
         if self.data_type == "tokenized_ABC":
