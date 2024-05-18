@@ -46,10 +46,10 @@ lightning:
     gradient_clip_val: 5
 
 callbacks:
-  # - model_checkpoint:
-  #     filename: "{epoch:06}"
-  #     verbose: True
-  #     save_last: True
+  - model_checkpoint:
+      filename: "{epoch:06}"
+      verbose: True
+      save_last: True
   - checkpoint_every_n_steps:
       save_step_frequency: 1000
       prefix: "N-Step-Checkpoint"
