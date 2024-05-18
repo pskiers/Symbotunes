@@ -1,11 +1,11 @@
 model:
-  model_type: folk-rnn
+  model_type: gpt2
   params:
-    vocab_size: 137
-    num_layers: 3
-    lstm_size: 512
-    dropout: 0.5
-    embedding_size: null
+    n_vocab: 137 # vocabulary size
+    n_ctx: 1955 # context size
+    n_embd: 768 # embedding size
+    n_head: 12 # number of attention heads
+    n_layer: 12 # number of laters in the model
     lr: 0.002
     lr_decay: 0.97
     lr_decay_start: 20
@@ -20,8 +20,8 @@ dataloaders:
     transforms:
       - folk_rnn:
     
-    batch_size: 64
-    num_workers: 16
+    batch_size: 2
+    num_workers: 1
     collate_fn: "pad_collate_single_sequence"
 
   train:
@@ -34,8 +34,8 @@ dataloaders:
         transforms:
           - folk_rnn:
         
-        batch_size: 64
-        num_workers: 16
+        batch_size: 2
+        num_workers: 1
         collate_fn: "pad_collate_single_sequence"
 
 lightning:
@@ -44,6 +44,7 @@ lightning:
     max_epochs: 100
     gradient_clip_algorithm: "value"
     gradient_clip_val: 5
+    # accelerator: "cpu"
 
 callbacks:
   # - model_checkpoint:
