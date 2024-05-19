@@ -3,7 +3,7 @@ from abc import abstractmethod, ABC
 import numpy as np
 import torch
 import torch.utils.data as data
-
+from sklearn.model_selection import train_test_split
 
 class BaseDataset(data.Dataset, ABC):
     """
@@ -18,15 +18,18 @@ class BaseDataset(data.Dataset, ABC):
         download: bool = True,
         transform: Callable | None = None,
         target_transform: Callable | None = None,
+        train_size: float = 0.8,
+        val_size: float = 0.1,
+        random_state: int = 42,
         **kwargs
     ) -> None:
         super().__init__()
         self.root = root
         self.split = split
-        self.train_size = 0.8
-        self.val_size = 0.1
-        self.test_size = 0.1
-        self.random_state = 42
+        self.train_size = train_size
+        self.val_size = val_size
+        self.test_size = 1 - train_size - val_size
+        self.random_state = random_state
         if download:
             self.download()
 
@@ -49,6 +52,19 @@ class BaseDataset(data.Dataset, ABC):
     @transform.setter
     def transform(self, transform: Callable) -> None:
         self._transform = transform
+
+    def split_data(self, data: np.ndarray) -> np.ndarray:
+        train_data, temp_data = train_test_split(data, train_size=self.train_size, shuffle=True, random_state=self.random_state)
+        val_data, test_data = train_test_split(temp_data, test_size=self.test_size/(self.test_size + self.val_size), shuffle=True, random_state=self.random_state)
+
+        if self.split == "train":
+            return train_data
+        elif self.split == "val":
+            return val_data
+        elif self.split == "test":
+            return test_data
+        else:
+            raise ValueError(f"Invalid split name: {self.split}. Expected one of ['train', 'val', 'test']")
 
     def __getitem__(self, index) -> torch.Tensor | np.ndarray:
         data = self.data[index]
