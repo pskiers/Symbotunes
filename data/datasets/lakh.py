@@ -21,9 +21,10 @@ class LakhMidiDataset(BaseDataset):
         target_transform: Callable | None = None,
         preload: bool = True,
         download: bool = True,
+        replace_if_exists: bool = False,
         **kwargs
     ) -> None:
-        super().__init__(root, split, download, transform, target_transform, **kwargs)
+        super().__init__(root, split, download, replace_if_exists, transform, target_transform, **kwargs)
 
         self.pipeline = Pipeline(type="midi_path")
 
@@ -53,7 +54,7 @@ class LakhMidiDataset(BaseDataset):
     def __len__(self) -> int:
         return len(self.data)
 
-    def download(self, replace_if_exists=False) -> None:
+    def download(self) -> None:
         # Temporary substitution, so that we don't download 1.7 GB of midi each time.
         # self.url = "http://hog.ee.columbia.edu/craffel/lmd/lmd_full.tar.gz"
         self.url = "https://drive.google.com/uc?export=download&id=1aV4rNwtb3b8f55bxmoTOmqc0zBPJ1MIp"
@@ -62,11 +63,11 @@ class LakhMidiDataset(BaseDataset):
             self.root,
             "train",
         )
-        if (not replace_if_exists and os.path.exists(os.path.join(dest_path, "lmd_full"))):
-            print("Dataset directory already exists. Skipping dowload.")
+        if not self.replace_if_exists and os.path.exists(os.path.join(dest_path, "lmd_full")):
+            print("Dataset directory already exists. Skipping download.")
             return
 
-        os.makedirs(dest_path, exist_ok=replace_if_exists)
+        os.makedirs(dest_path, exist_ok=self.replace_if_exists)
         tarball_path = os.path.join(dest_path, "lakh.tar.gz")
         try:
             Downloader.download(self.url, tarball_path)

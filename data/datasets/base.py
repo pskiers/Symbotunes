@@ -16,6 +16,7 @@ class BaseDataset(data.Dataset, ABC):
         root: str = "_data",
         split: str = "train",
         download: bool = True,
+        replace_if_exists: bool = False,
         transform: Callable | None = None,
         target_transform: Callable | None = None,
         **kwargs
@@ -23,6 +24,7 @@ class BaseDataset(data.Dataset, ABC):
         super().__init__()
         self.root = root
         self.split = split
+        self.replace_if_exists = replace_if_exists
         if download:
             self.download()
 

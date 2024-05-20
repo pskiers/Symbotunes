@@ -22,11 +22,11 @@ class FolkRnnDataset(BaseDataset):
         target_transform: Callable | None = None,
         preload: bool = True,
         download: bool = True,
+        replace_if_exists: bool = True,
         **kwargs
     ) -> None:
         self.data_type = data_type
-        super().__init__(root, split, download, transform, target_transform, **kwargs)
-
+        super().__init__(root, split, download, replace_if_exists, transform, target_transform, **kwargs)
         if data_type == "midi":
             self.file_list = glob.glob(os.path.join(self.root, "*.mid"))
             self.pipeline = Pipeline(type="midi")
@@ -69,13 +69,17 @@ class FolkRnnDataset(BaseDataset):
         if self.data_type == "tokenized_ABC":
             self.url = "https://raw.githubusercontent.com/IraKorshunova/folk-rnn/master/data/data_v2"
 
+            dest_path = os.path.join(
+                self.root,
+                "train",
+            )
+            file_path = os.path.join(dest_path, "data_v2.txt")
+            if not self.replace_if_exists and os.path.exists(file_path):
+                print("Dataset already exists. Skipping download.")
+                return
             response = requests.get(self.url)
 
             if response.status_code == 200:
-                dest_path = os.path.join(
-                    self.root,
-                    "train",
-                )
                 os.makedirs(dest_path, exist_ok=True)
-                with open(os.path.join(dest_path, "data_v2.txt"), "wb") as file:
+                with open(file_path, "wb") as file:
                     file.write(response.content)
