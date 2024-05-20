@@ -1,6 +1,7 @@
 from typing import Callable
 from torchvision import transforms  # type: ignore[import]
 from .folk_rnn import FolkTransform
+from .lakh import LakhTransform
 
 
 # fmt: off
@@ -19,5 +20,7 @@ def parse_transform(name: str, kwargs: dict) -> Callable:
     match name:
         case "folk_rnn":
             return FolkTransform(**kwargs)
+        case "lakh":
+            return LakhTransform()
         case _:
             raise NotImplementedError()

@@ -1,10 +1,10 @@
 import os
 import tarfile
-import requests
 from typing import Callable
 
 from .Pipeline.Pipeline import Pipeline
-from base import BaseDataset
+from .base import BaseDataset
+from .Utils.downloader import Downloader, DownloadError
 
 
 class LakhMidiDataset(BaseDataset):
@@ -53,22 +53,26 @@ class LakhMidiDataset(BaseDataset):
     def __len__(self) -> int:
         return len(self.data)
 
-    def download(self) -> None:
+    def download(self, replace_if_exists=False) -> None:
         # Temporary substitution, so that we don't download 1.7 GB of midi each time.
         # self.url = "http://hog.ee.columbia.edu/craffel/lmd/lmd_full.tar.gz"
         self.url = "https://drive.google.com/uc?export=download&id=1aV4rNwtb3b8f55bxmoTOmqc0zBPJ1MIp"
 
-        response = requests.get(self.url)
+        dest_path = os.path.join(
+            self.root,
+            "train",
+        )
+        if (not replace_if_exists and os.path.exists(os.path.join(dest_path, "lmd_full"))):
+            print("Dataset directory already exists. Skipping dowload.")
+            return
 
-        if response.status_code == 200:
-            dest_path = os.path.join(
-                self.root,
-                "train",
-            )
-            os.makedirs(dest_path, exist_ok=True)
-            tarball_path = os.path.join(dest_path, "lakh.tar.gz")
-            with open(tarball_path, "wb") as file:
-                file.write(response.content)
-            with tarfile.open(tarball_path, "r:*") as file:
-                file.extractall(dest_path)
-            os.remove(tarball_path)
+        os.makedirs(dest_path, exist_ok=replace_if_exists)
+        tarball_path = os.path.join(dest_path, "lakh.tar.gz")
+        try:
+            Downloader.download(self.url, tarball_path)
+        except DownloadError as e:
+            print(e)
+
+        with tarfile.open(tarball_path, "r:*") as file:
+            file.extractall(dest_path)
+        os.remove(tarball_path)
