@@ -1,4 +1,5 @@
 import sys
+import os
 import requests
 
 
@@ -28,4 +29,4 @@ class Downloader(object):
                     done = int(50 * dl / total_length)
                     sys.stdout.write(f"\r[{'=' * done}{' ' * (50-done)}]")
                     sys.stdout.flush()
-        print(f"\nFile saved at {file_name}")
+        print(f"\nFile saved at {os.path.dirname(file_name)}")

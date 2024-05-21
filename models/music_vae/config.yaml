@@ -1,0 +1,56 @@
+# model:
+#   model_type: music_vae
+#   params:
+#     vocab_size: 137
+#     num_layers: 3
+#     lstm_size: 512
+#     dropout: 0.5
+#     embedding_size: null
+#     lr: 0.002
+#     lr_decay: 0.97
+#     lr_decay_start: 20
+
+dataloaders:
+  validation:
+    name: "lakh"
+    root: "_data"
+    split: "test"
+    download: True
+    transforms:
+      - lakh:
+    
+    batch_size: 64
+    num_workers: 16
+    # collate_fn: "pad_collate_single_sequence"
+
+  train:
+    - dataset:
+        name: "lakh"
+        root: "_data"
+        split: "train"
+        download: False
+        transforms:
+          - lakh:
+        
+        batch_size: 64
+        num_workers: 16
+        # collate_fn: "pad_collate_single_sequence"
+
+# lightning:
+#   trainer:
+#     benchmark: True
+#     max_epochs: 100
+#     gradient_clip_algorithm: "value"
+#     gradient_clip_val: 5
+
+# callbacks:
+#   - model_checkpoint:
+#       filename: "{epoch:06}"
+#       verbose: True
+#       save_last: True
+#   - checkpoint_every_n_steps:
+#       save_step_frequency: 1000
+#       prefix: "N-Step-Checkpoint"
+#       use_modelcheckpoint_filename: False
+#   - setup_callback:
+#   - cuda_callback:

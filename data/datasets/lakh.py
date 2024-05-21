@@ -67,7 +67,7 @@ class LakhMidiDataset(BaseDataset):
             print("Dataset directory already exists. Skipping download.")
             return
 
-        os.makedirs(dest_path, exist_ok=self.replace_if_exists)
+        os.makedirs(dest_path, exist_ok=True)
         tarball_path = os.path.join(dest_path, "lakh.tar.gz")
         try:
             Downloader.download(self.url, tarball_path)
