@@ -36,7 +36,7 @@ class LakhMidiDataset(BaseDataset):
 
     def _load_data(self):
         # self._targets = []
-        self._data = self.pipeline.process(self.root)
+        self._data = self.pipeline.process(os.path.join(self.root, "train", "lmd_full"))
         # handle targets
 
     def __getitem__(self, index: int) -> tuple:
