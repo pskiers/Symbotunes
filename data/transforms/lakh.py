@@ -32,8 +32,8 @@ class LakhTransform(object):
         """
         best_bars = None
         for tok_seq in midi:
-            bars = []
-            current_bar = []
+            bars: List[List[str]] = []
+            current_bar: List[str] = []
             number_of_nonempty_bars = 0
             is_drum = False
             for tok in tok_seq.tokens:
