@@ -25,7 +25,7 @@ class FolkRNN(BaseModel):
         start_token: int = 135,
         end_token: int = 136,
         *args: torch.Any,
-        **kwargs: torch.Any
+        **kwargs: torch.Any,
     ) -> None:
         super().__init__(*args, **kwargs)
 

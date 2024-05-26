@@ -31,7 +31,7 @@ class FolkRnnDataset(BaseDataset):
             self.data_file = os.path.join(self.root, "train", "data_v2.txt")
             with open(self.data_file, "r", encoding="utf-8") as file:
                 full_data = np.array(file.read().split("\n\n"))
-                
+
             self.data = self.split_data(full_data)
 
         else:
