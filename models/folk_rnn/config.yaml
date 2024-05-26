@@ -18,8 +18,7 @@ dataloaders:
     download: True
     data_type: "tokenized_ABC"
     transforms:
-      - folk_rnn:
-    
+      - folk_rnn:    
     batch_size: 64
     num_workers: 16
     collate_fn: "pad_collate_single_sequence"
