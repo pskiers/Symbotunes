@@ -1,6 +1,7 @@
 from omegaconf import OmegaConf
 import argparse
 import pytorch_lightning as pl
+from pytorch_lightning.loggers import WandbLogger
 from os import environ
 from pathlib import Path
 import datetime
@@ -30,30 +31,34 @@ if __name__ == "__main__":
     lightning_config = config.pop("lightning", OmegaConf.create())  # type: ignore[call-arg, arg-type]
 
     trainer_config = lightning_config.get("trainer", OmegaConf.create())
-    trainer_opt = OmegaConf.to_container(trainer_config)
+    trainer_kwargs = OmegaConf.to_container(trainer_config)
     lightning_config.trainer = trainer_config
 
     dl_config_orig = config.pop("dataloaders")  # type: ignore[arg-type]
     dl_config = OmegaConf.to_container(dl_config_orig, resolve=True)
     train_dls, test_dl = get_dataloaders(dl_config)  # type: ignore[arg-type]
 
+    model_type = get_model(config.model.get("model_type"))
     if checkpoint_path is not None:
-        config.model.params["ckpt_path"] = checkpoint_path
-
-    model = get_model(config.model.get("model_type"), config.model.get("params", dict()))
+        model = model_type.load_from_checkpoint(checkpoint_path, **config.model.get("params", dict()))
+    else:
+        model = model_type(**config.model.get("params", dict()))
 
     now = datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
     nowname = model.__class__.__name__ + "_" + now
-
-    trainer_kwargs = dict()
+    common_callbacks_kwargs = {
+        "nowname": nowname,
+        "config": config,
+        "lightning_config": lightning_config,
+        "dl_config": dl_config,
+    }
 
     tags = []  # type: ignore[var-annotated]
-    trainer_kwargs["logger"] = pl.loggers.WandbLogger(name=nowname, id=nowname, tags=tags)
-
+    trainer_kwargs["logger"] = WandbLogger(name=nowname, id=nowname, tags=tags, project="Symbotunes")  # type: ignore
     callback_cfg = config.get("callbacks", OmegaConf.create())  # type: ignore[arg-type]
-    trainer_kwargs["callbacks"] = get_callbacks(config.callbacks)  # type: ignore[assignment]
+    trainer_kwargs["callbacks"] = get_callbacks(config.callbacks, common_callbacks_kwargs)  # type: ignore
 
-    trainer = pl.Trainer(**trainer_opt, **trainer_kwargs)  # type: ignore[arg-type]
+    trainer = pl.Trainer(**trainer_kwargs)  # type: ignore[arg-type]
 
     trainer.fit(
         model,
