@@ -24,7 +24,7 @@ jobs:
           pip install types-requests
       
       - name: Run Linter
-        run: black --check . --line-length 120
+        run: black --check . --line-length 120 --diff
 
       - name: Run Type checker
         run: mypy --ignore-missing-imports .
