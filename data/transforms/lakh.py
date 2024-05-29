@@ -34,7 +34,6 @@ class LakhTransform(object):
         for tok_seq in midi:
             bars: List[List[str]] = []
             current_bar: List[str] = []
-            number_of_nonempty_bars = 0
             is_drum = False
             for tok in tok_seq.tokens:
                 if "Drum" in tok:
@@ -42,13 +41,11 @@ class LakhTransform(object):
                     break
                 if "Bar_" in tok:
                     if current_bar:
-                        number_of_nonempty_bars += 0
                         bars.append(current_bar)
                         current_bar = []
                 else:
                     current_bar.append(tok)
             if current_bar:
-                number_of_nonempty_bars += 0
                 bars.append(current_bar)
             if is_drum:
                 # In the current implementation only melodic sequences are accepted
@@ -66,6 +63,6 @@ class LakhTransform(object):
         start_idx = randint(0, len(bars) - number_of_bars - 1)
         end_idx = start_idx + number_of_bars
         sampled_bars = bars[start_idx:end_idx]
-        tokens = [x for xs in sampled_bars for x in xs]  # Flatten the bars
+        tokens = [self.tokenizer.vocab[x] for xs in sampled_bars for x in xs]  # Flatten the bars and convert to int
 
         return tokens
