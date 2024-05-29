@@ -3,6 +3,8 @@ _data
 wandb
 logs
 samples
+samples2
+samples3
 
 # vscode
 .vscode

@@ -136,6 +136,8 @@ class GPT2(BaseModel):
         lr: float = 0.003,
         lr_decay: float = 0.97,
         lr_decay_start: int = 20,
+        start_token: int = 135,
+        end_token: int = 136,
         *args: torch.Any,
         **kwargs: torch.Any
     ) -> None:
@@ -157,6 +159,9 @@ class GPT2(BaseModel):
         n_hidden = 2*n_vocab
         self.ll = nn.Linear(n_embd, n_hidden)
         self.ll2 = nn.Linear(n_hidden, n_vocab)
+
+        self.start_token = start_token
+        self.end_token = end_token
 
     def set_embeddings_weights(self, model_embeddings_weights): # ?
         embed_shape = model_embeddings_weights.shape
@@ -221,8 +226,28 @@ class GPT2(BaseModel):
 
     def training_step(self, batch, batch_idx):
         loss = self._step(batch)
-        self.log('train_loss', loss, prog_bar=True, logger=True, on_step=False, on_epoch=True)
+        self.log('train/loss', loss, prog_bar=True, logger=True, on_step=True, on_epoch=True)
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        loss = self._step(batch)
+        self.log("val/loss", loss, prog_bar=True, logger=True, on_step=False, on_epoch=True)
         return loss
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=1e-4)
+
+    @torch.no_grad()
+    def sample(self, batch_size: int) -> list[torch.Tensor]:
+        batch = torch.tensor([[self.start_token] for _ in range(batch_size)], device=self.device)
+        samples: list[torch.Tensor] = []
+        while batch.shape[0] > 0:
+            out, _ = self(batch)
+            probabilities = torch.softmax(out[:, -1], dim=-1)
+            distributions = torch.distributions.categorical.Categorical(probabilities)
+            next_tokens = distributions.sample().unsqueeze(1)
+            batch = torch.concat(tensors=(batch, next_tokens), dim=1)
+            ended = batch[:, -1] == self.end_token 
+            samples += [sample for sample in batch[ended]]
+            batch = batch[~ended]
+        return samples

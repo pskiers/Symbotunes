@@ -3,7 +3,7 @@ model:
   params:
     n_vocab: 137 # vocabulary size
     n_ctx: 1955 # context size
-    n_embd: 768 # embedding size
+    n_embd: 768 # embedding size #768 600
     n_head: 12 # number of attention heads
     n_layer: 12 # number of laters in the model
     lr: 0.002
@@ -20,8 +20,8 @@ dataloaders:
     transforms:
       - folk_rnn:
     
-    batch_size: 2
-    num_workers: 1
+    batch_size: 16
+    num_workers: 4
     collate_fn: "pad_collate_single_sequence"
 
   train:
@@ -29,28 +29,29 @@ dataloaders:
         name: "folk-rnn"
         root: "_data"
         split: "train"
-        download: False
+        download: True
         data_type: "tokenized_ABC"
         transforms:
           - folk_rnn:
         
-        batch_size: 2
-        num_workers: 1
+        batch_size: 4
+        num_workers: 4
         collate_fn: "pad_collate_single_sequence"
 
 lightning:
   trainer:
     benchmark: True
     max_epochs: 100
-    gradient_clip_algorithm: "value"
-    gradient_clip_val: 5
+    accumulate_grad_batches: 128
+    # gradient_clip_algorithm: "value"
+    # gradient_clip_val: 5
     # accelerator: "cpu"
 
 callbacks:
-  # - model_checkpoint:
-  #     filename: "{epoch:06}"
-  #     verbose: True
-  #     save_last: True
+  - model_checkpoint:
+      filename: "{epoch:06}"
+      verbose: True
+      save_last: True
   - checkpoint_every_n_steps:
       save_step_frequency: 1000
       prefix: "N-Step-Checkpoint"

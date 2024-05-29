@@ -34,6 +34,7 @@ if __name__ == "__main__":
     if torch.cuda.is_available():
         model.to(torch.device("cuda"))
 
+    model.eval()
     samples = model.sample(batch_size)
 
     # TODO handle other tokenizers. Maybe read the what tokenizer should be used from config somehow. Otherwise, if
