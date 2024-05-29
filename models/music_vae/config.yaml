@@ -1,0 +1,69 @@
+model:
+  model_type: music-vae
+  params:
+    lr: 0.002
+    kl_weight: 1.0
+    use_teacher_forcing: True
+    encoder_config:
+      input_size: 137
+      z_size: 64
+      hidden_size: 256
+      num_layers: 1
+      bidirectional: True
+    decoder_config:
+      num_tokens: 137
+      z_size: 64
+      linear_in_out_size: 64
+      conductor_hidden: 256
+      conductor_num_layers: 1
+      rnn_hidden_size: 64
+      rnn_num_layers: 1
+      num_levels: 4
+      notes_per_bar: 16
+
+dataloaders:
+  validation:
+    name: "folk-rnn"
+    root: "_data"
+    split: "test"
+    download: True
+    data_type: "tokenized_ABC"
+    transforms:
+      - folk_rnn:    
+          sequence_size: 64
+    batch_size: 64
+    num_workers: 16
+    # collate_fn: "pad_collate_single_sequence"
+
+  train:
+    - dataset:
+        name: "folk-rnn"
+        root: "_data"
+        split: "train"
+        download: False
+        data_type: "tokenized_ABC"
+        transforms:
+          - folk_rnn:
+              sequence_size: 64
+        batch_size: 64
+        num_workers: 16
+        # collate_fn: "pad_collate_single_sequence"
+
+lightning:
+  trainer:
+    benchmark: True
+    max_epochs: 100
+    gradient_clip_algorithm: "value"
+    gradient_clip_val: 5
+
+callbacks:
+  - model_checkpoint:
+      filename: "{epoch:06}"
+      verbose: True
+      save_last: True
+  - checkpoint_every_n_steps:
+      save_step_frequency: 1000
+      prefix: "N-Step-Checkpoint"
+      use_modelcheckpoint_filename: False
+  - setup_callback:
+  - cuda_callback:
