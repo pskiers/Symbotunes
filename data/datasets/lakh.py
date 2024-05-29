@@ -4,7 +4,7 @@ from typing import Callable
 
 from .Pipeline.Pipeline import Pipeline
 from .base import BaseDataset
-from .Utils.downloader import Downloader, DownloadError
+from .utils.downloader import Downloader, DownloadError
 
 
 class LakhMidiDataset(BaseDataset):
