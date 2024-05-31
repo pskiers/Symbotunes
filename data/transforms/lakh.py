@@ -23,46 +23,23 @@ class LakhTransform(object):
         self.config = TokenizerConfig(**self.tokenizer_params)
         self.tokenizer = REMI(self.config)
 
-    def _get_bars_from_tokenized_midi(self, midi: List[TokSequence]):
-        """
-        Tokenized MIDI contains multiple tracks, each with a TokSequence containing multiple tokens.
-        Each track is separated by bars and analyzed. Only the best track is returned, which is determined by:
-        - absence of drums
-        - length of nonempty bars
-        """
-        best_bars = None
-        for tok_seq in midi:
-            bars: List[List[str]] = []
-            current_bar: List[str] = []
-            is_drum = False
-            for tok in tok_seq.tokens:
-                if "Drum" in tok:
-                    is_drum = True
-                    break
-                if "Bar_" in tok:
-                    if current_bar:
-                        bars.append(current_bar)
-                        current_bar = []
-                else:
-                    current_bar.append(tok)
-            if current_bar:
-                bars.append(current_bar)
-            if is_drum:
-                # In the current implementation only melodic sequences are accepted
-                continue
-            if best_bars is None or len(bars) > len(best_bars):
-                best_bars = bars
+    def _sample_bars(self, tokens: TokSequence, num_bars):
+        tokens = tokens.tokens
+        bar_positions = [i for i, token in enumerate(tokens) if token.startswith('Bar_')]
 
-        return best_bars
+        if len(bar_positions) < num_bars:
+            return None
+
+        max_start_index = len(bar_positions) - num_bars
+        start_index = randint(0, max_start_index)
+
+        start_pos = bar_positions[start_index]
+        end_pos = bar_positions[start_index + num_bars] if (start_index + num_bars) < len(bar_positions) else len(tokens)
+
+        sampled_tokens = tokens[start_pos:end_pos]
+        return sampled_tokens
 
     def __call__(self, path: str, number_of_bars: int = 16):
-        tokenized_midi = self.tokenizer(path)
-        bars = self._get_bars_from_tokenized_midi(tokenized_midi)
-        if bars is None or len(bars) < number_of_bars:
-            return None
-        start_idx = randint(0, len(bars) - number_of_bars - 1)
-        end_idx = start_idx + number_of_bars
-        sampled_bars = bars[start_idx:end_idx]
-        tokens = [self.tokenizer.vocab[x] for xs in sampled_bars for x in xs]  # Flatten the bars and convert to int
-
+        tokenized_midi = self.tokenizer(path)[0]
+        tokens = self._sample_bars(tokenized_midi, number_of_bars)
         return tokens
