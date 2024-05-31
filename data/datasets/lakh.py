@@ -57,7 +57,12 @@ class LakhMidiDataset(BaseDataset):
     def __len__(self) -> int:
         return len(self.data)
 
-    def remove_empty_bars_from_midi(self, file):
+    def _get_next_bar_start(self, time, ticks_per_bar):
+        return ((time // ticks_per_bar) + 1) * ticks_per_bar
+
+    def _remove_empty_bars_from_midi(self, file):
+        if file == '_data/train/lmd_full/2/2a00ca2349fdbd8ad4b72fab99281e59_6.mid':
+            print("Oj")
         try:
             midi = MidiFile(file)
         except OSError:  # Corrupted MIDI file
@@ -82,39 +87,23 @@ class LakhMidiDataset(BaseDataset):
         for track in midi.tracks:
             new_track = MidiTrack()
             new_midi.tracks.append(new_track)
+            active_notes = set()
 
-            current_time = 0
-            bar_start_time = 0
-            empty_bar = True
-            buffer = []
-
-            first_note_on_occured = False
+            previous_time = 0
 
             for msg in track:
-                current_time += msg.time
-
-                if current_time >= bar_start_time + ticks_per_bar:
-                    bar_start_time += ticks_per_bar
-                    if not empty_bar:
-                        new_track.extend(buffer)
-                    empty_bar = True
-                    buffer = []
-
+                if not active_notes:
+                    previous_bar_end = self._get_next_bar_start(previous_time, ticks_per_bar)
+                    ticks_till_end_of_bar = previous_bar_end - previous_time
+                    if msg.time >= ticks_till_end_of_bar + ticks_per_bar:
+                        msg.time = max(1, ticks_till_end_of_bar)
                 if msg.type == 'note_on':
                     if msg.velocity > 0:
-                        empty_bar = False
-                    if not first_note_on_occured:
-                        first_note_on_occured = True
-                        msg.time = 1
-
-                if msg.type == 'note_on' and msg.velocity == 0:  # Note-on with velocity 0 means note-off
-                    note_off_msg = Message('note_off', note=msg.note, velocity=0, channel=msg.channel, time=msg.time)
-                    buffer.append(note_off_msg)
-                else:
-                    buffer.append(msg)
-
-            if not empty_bar:
-                new_track.extend(buffer)
+                        active_notes.add(msg.note)
+                    else:
+                        active_notes.discard(msg.note)
+                new_track.append(msg)
+                previous_time += msg.time
 
         new_midi.save(file)
 
@@ -185,6 +174,6 @@ class LakhMidiDataset(BaseDataset):
             for file in files:
                 full_path = os.path.join(root, file)
                 if "_" in file:
-                    self.remove_empty_bars_from_midi(full_path)
+                    self._remove_empty_bars_from_midi(full_path)
                 else:
                     os.remove(full_path)
