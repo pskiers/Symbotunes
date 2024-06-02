@@ -35,6 +35,8 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+#logs
+/logs
 #datasets
 /data/datasets/FolkRnnData
 

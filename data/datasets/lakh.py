@@ -4,7 +4,6 @@ from typing import Callable
 from mido import MidiFile, MidiTrack, MetaMessage, Message
 
 
-from .Pipeline.Pipeline import Pipeline
 from .base import BaseDataset
 from .utils.downloader import Downloader, DownloadError
 from .utils.file_utility import FileUtility
@@ -29,17 +28,23 @@ class LakhMidiDataset(BaseDataset):
     ) -> None:
         super().__init__(root, split, download, replace_if_exists, transform, target_transform, **kwargs)
 
-        self.pipeline = Pipeline(type="midi_path")
-
         self.data = []  # type: ignore[assignment]
         self.targets = []  # type: ignore[assignment]
 
         if preload:
             self._load_data()
 
+    def _load_midi_paths(self, directory_path):
+        file_list = []
+        for root, _, files in os.walk(directory_path):
+            for file in files:
+                full_path = os.path.join(root, file)
+                file_list.append(full_path)
+        return file_list
+
     def _load_data(self):
         # self._targets = []
-        self._data = self.pipeline.process(os.path.join(self.root, "train", "lmd_full"))
+        self._data = self._load_midi_paths(os.path.join(self.root, "train", "lmd_full"))
         # handle targets
 
     def __getitem__(self, index: int) -> tuple:
@@ -61,8 +66,6 @@ class LakhMidiDataset(BaseDataset):
         return ((time // ticks_per_bar) + 1) * ticks_per_bar
 
     def _remove_empty_bars_from_midi(self, file):
-        if file == '_data/train/lmd_full/2/2a00ca2349fdbd8ad4b72fab99281e59_6.mid':
-            print("Oj")
         try:
             midi = MidiFile(file)
         except OSError:  # Corrupted MIDI file
