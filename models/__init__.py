@@ -3,6 +3,7 @@ from .base import BaseModel
 from .folk_rnn import FolkRNN
 from .gpt import GPT2
 
+
 def get_model(name: str) -> Type[BaseModel]:
     match name:
         case "folk-rnn":
