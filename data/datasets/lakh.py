@@ -1,8 +1,8 @@
 import os
 import tarfile
 from typing import Callable
-from mido import MidiFile, MidiTrack, MetaMessage, Message
-
+from mido import MidiFile, MidiTrack, MetaMessage
+import torch
 
 from .base import BaseDataset
 from .utils.downloader import Downloader, DownloadError
@@ -24,12 +24,12 @@ class LakhMidiDataset(BaseDataset):
         preload: bool = True,
         download: bool = True,
         replace_if_exists: bool = False,
-        **kwargs
+        **kwargs,
     ) -> None:
         super().__init__(root, split, download, replace_if_exists, transform, target_transform, **kwargs)
 
         self.data = []  # type: ignore[assignment]
-        self.targets = []  # type: ignore[assignment]
+        # self.targets = []  # type: ignore[assignment]
 
         if preload:
             self._load_data()
@@ -47,7 +47,7 @@ class LakhMidiDataset(BaseDataset):
         self._data = self._load_midi_paths(os.path.join(self.root, "train", "lmd_full"))
         # handle targets
 
-    def __getitem__(self, index: int) -> tuple:
+    def __getitem__(self, index: int) -> torch.Tensor:
         midi_data = self.data[index]
 
         # target = self._targets[index]
@@ -57,7 +57,7 @@ class LakhMidiDataset(BaseDataset):
         # if self.target_transform:
         #     target = self.target_transform(target)9
 
-        return midi_data  # type: ignore[return-value]
+        return torch.Tensor(midi_data)  # type: ignore[return-value]
 
     def __len__(self) -> int:
         return len(self.data)
@@ -79,7 +79,7 @@ class LakhMidiDataset(BaseDataset):
         # Default time signature (4/4)
         time_signature = (4, 4)
         for msg in midi.tracks[0]:
-            if msg.type == 'time_signature':
+            if msg.type == "time_signature":
                 time_signature = (msg.numerator, msg.denominator)
                 break
 
@@ -100,7 +100,7 @@ class LakhMidiDataset(BaseDataset):
                     ticks_till_end_of_bar = previous_bar_end - previous_time
                     if msg.time >= ticks_till_end_of_bar + ticks_per_bar:
                         msg.time = max(1, ticks_till_end_of_bar)
-                if msg.type == 'note_on':
+                if msg.type == "note_on":
                     if msg.velocity > 0:
                         active_notes.add(msg.note)
                     else:
@@ -120,15 +120,24 @@ class LakhMidiDataset(BaseDataset):
         channel_tracks = {}
         for i, track in enumerate(midi.tracks):
             for msg in track:
-                if msg.type in ['note_on', 'note_off', 'polytouch', 'control_change',
-                                'program_change', 'aftertouch', 'pitchwheel']:
+                if msg.type in [
+                    "note_on",
+                    "note_off",
+                    "polytouch",
+                    "control_change",
+                    "program_change",
+                    "aftertouch",
+                    "pitchwheel",
+                ]:
                     if msg.channel == 9:  # Channel 10 is reserved for drums (Ch9 for 0-indexed)
                         continue
                     if msg.channel not in channel_tracks:
                         channel_tracks[msg.channel] = MidiTrack()
-                        channel_tracks[msg.channel].append(MetaMessage('track_name', name=f'Track {i} Channel {msg.channel}', time=0))
+                        channel_tracks[msg.channel].append(
+                            MetaMessage("track_name", name=f"Track {i} Channel {msg.channel}", time=0)
+                        )
                     channel_tracks[msg.channel].append(msg)
-                elif msg.type == 'sysex' or msg.type == 'meta':
+                elif msg.type == "sysex" or msg.type == "meta":
                     for channel, ch_track in channel_tracks.items():
                         ch_track.append(msg)
 
@@ -139,8 +148,6 @@ class LakhMidiDataset(BaseDataset):
             new_midi.save(os.path.join(midi_directory, output_filename))
 
     def download(self) -> None:
-        # Temporary substitution, so that we don't download 1.7 GB of midi each time.
-        # self.url = "http://hog.ee.columbia.edu/craffel/lmd/lmd_full.tar.gz"
         self.url = "https://drive.google.com/uc?export=download&id=1aV4rNwtb3b8f55bxmoTOmqc0zBPJ1MIp"
 
         dest_path = os.path.join(
@@ -160,8 +167,8 @@ class LakhMidiDataset(BaseDataset):
         except DownloadError as e:
             print(e)
 
-        with tarfile.open(tarball_path, "r:*") as file:
-            file.extractall(dest_path)
+        with tarfile.open(tarball_path, "r:*") as tar_file:
+            tar_file.extractall(dest_path)
         os.remove(tarball_path)
 
         print("Removing drums...")

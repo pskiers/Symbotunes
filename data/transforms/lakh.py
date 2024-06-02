@@ -1,7 +1,6 @@
 # from random import randint # TODO should the transform sample the midi sequence at random?
 from miditok import REMI, TokenizerConfig, TokSequence
 from random import randint
-from typing import List
 
 TOKENIZER_PARAMS = {
     "pitch_range": (0, 127),
@@ -25,7 +24,7 @@ class LakhTransform(object):
 
     def _sample_bars(self, tokens: TokSequence, num_bars):
         tokens = tokens.tokens
-        bar_positions = [i for i, token in enumerate(tokens) if token.startswith('Bar_')]
+        bar_positions = [i for i, token in enumerate(tokens) if token.startswith("Bar_")]
 
         if len(bar_positions) < num_bars:
             return None
@@ -34,7 +33,9 @@ class LakhTransform(object):
         start_index = randint(0, max_start_index)
 
         start_pos = bar_positions[start_index]
-        end_pos = bar_positions[start_index + num_bars] if (start_index + num_bars) < len(bar_positions) else len(tokens)
+        end_pos = (
+            bar_positions[start_index + num_bars] if (start_index + num_bars) < len(bar_positions) else len(tokens)
+        )
 
         sampled_tokens = tokens[start_pos:end_pos]
         return sampled_tokens
@@ -42,4 +43,5 @@ class LakhTransform(object):
     def __call__(self, path: str, number_of_bars: int = 16):
         tokenized_midi = self.tokenizer(path)[0]
         tokens = self._sample_bars(tokenized_midi, number_of_bars)
-        return tokens
+        int_tokens = [self.tokenizer.vocab[t] for t in tokens]
+        return int_tokens
