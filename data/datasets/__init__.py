@@ -1,5 +1,6 @@
 from .base import BaseDataset
 from .folk_rnn import FolkRnnDataset
+from .lakh import LakhMidiDataset
 
 
 def get_dataset(name: str, config: dict) -> BaseDataset:
@@ -7,5 +8,7 @@ def get_dataset(name: str, config: dict) -> BaseDataset:
     match name:
         case "folk-rnn":
             return FolkRnnDataset(**config)
+        case "lakh":
+            return LakhMidiDataset(**config)
         case _:
             raise NotImplementedError()
