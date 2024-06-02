@@ -2,6 +2,7 @@ from typing import Callable
 from torchvision import transforms  # type: ignore[import]
 from .folk_rnn import FolkTransform
 from .file_loaders import LoadMIDI
+from .lakh import LakhTransform
 
 
 # fmt: off
@@ -20,5 +21,7 @@ def parse_transform(name: str, kwargs: dict) -> Callable:
             return FolkTransform(**kwargs)
         case "load_midi":
             return LoadMIDI(**kwargs)
+        case "lakh":
+            return LakhTransform()
         case _:
             raise NotImplementedError()

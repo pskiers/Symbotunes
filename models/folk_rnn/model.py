@@ -113,7 +113,9 @@ class FolkRNN(BaseModel):
         samples: list[torch.Tensor] = []
         while batch.shape[0] > 0:
             out = self(batch, lengths)
-            next_tokens = out[:, -1].argmax(dim=1).unsqueeze(1)
+            probabilities = torch.softmax(out[:, -1], dim=-1)
+            distributions = torch.distributions.categorical.Categorical(probabilities)
+            next_tokens = distributions.sample().unsqueeze(1)
             batch = torch.concat(tensors=(batch, next_tokens), dim=1)
             ended = batch[:, -1] == self.end_token
             samples += [sample for sample in batch[ended]]

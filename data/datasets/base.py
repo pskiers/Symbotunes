@@ -17,6 +17,7 @@ class BaseDataset(data.Dataset, ABC):
         root: str = "_data",
         split: str = "train",
         download: bool = True,
+        replace_if_exists: bool = False,
         transform: Callable | None = None,
         target_transform: Callable | None = None,
         train_size: float = 0.8,
@@ -27,6 +28,7 @@ class BaseDataset(data.Dataset, ABC):
         super().__init__()
         self.root = root
         self.split = split
+        self.replace_if_exists = replace_if_exists
         self.train_size = train_size
         self.val_size = val_size
         self.test_size = 1 - train_size - val_size
