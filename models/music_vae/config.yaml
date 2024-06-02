@@ -1,25 +1,24 @@
 model:
   model_type: music-vae
   params:
-    lr: 0.002
-    kl_weight: 1.0
-    use_teacher_forcing: True
+    lr: 0.001
+    kl_weight: 0.2
+    use_teacher_forcing: False
     encoder_config:
       input_size: 137
-      z_size: 64
-      hidden_size: 256
+      z_size: 512
+      hidden_size: 2048
       num_layers: 1
-      bidirectional: True
     decoder_config:
       num_tokens: 137
-      z_size: 64
-      linear_in_out_size: 64
-      conductor_hidden: 256
-      conductor_num_layers: 1
-      rnn_hidden_size: 64
-      rnn_num_layers: 1
-      num_levels: 4
-      notes_per_bar: 16
+      z_size: 512
+      conductor_in: 512
+      conductor_hidden: 1024
+      conductor_num_layers: 2
+      lstm_hidden: 1024
+      lstm_num_layers: 2
+      num_subsequences: 2
+      notes_per_subsequence: 16
 
 dataloaders:
   validation:
@@ -29,8 +28,8 @@ dataloaders:
     download: True
     data_type: "tokenized_ABC"
     transforms:
-      - folk_rnn:    
-          sequence_size: 64
+      - folk_rnn:
+          sequence_size: 32
     batch_size: 64
     num_workers: 16
     # collate_fn: "pad_collate_single_sequence"
@@ -40,11 +39,11 @@ dataloaders:
         name: "folk-rnn"
         root: "_data"
         split: "train"
-        download: False
+        download: True
         data_type: "tokenized_ABC"
         transforms:
           - folk_rnn:
-              sequence_size: 64
+              sequence_size: 32
         batch_size: 64
         num_workers: 16
         # collate_fn: "pad_collate_single_sequence"
@@ -52,9 +51,8 @@ dataloaders:
 lightning:
   trainer:
     benchmark: True
-    max_epochs: 100
-    gradient_clip_algorithm: "value"
-    gradient_clip_val: 5
+    max_steps: 100000
+    # accumulate_grad_batches: 8
 
 callbacks:
   - model_checkpoint:
