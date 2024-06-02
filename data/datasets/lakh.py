@@ -148,7 +148,7 @@ class LakhMidiDataset(BaseDataset):
             new_midi.save(os.path.join(midi_directory, output_filename))
 
     def download(self) -> None:
-        self.url = "https://drive.google.com/uc?export=download&id=1aV4rNwtb3b8f55bxmoTOmqc0zBPJ1MIp"
+        self.url = "http://hog.ee.columbia.edu/craffel/lmd/lmd_full.tar.gz"
 
         dest_path = os.path.join(
             self.root,
