@@ -229,7 +229,7 @@ class GPT2(BaseModel):
 
     def training_step(self, batch, batch_idx):
         loss = self._step(batch)
-        self.log('train/loss', loss, prog_bar=True, logger=True, on_step=True, on_epoch=True)
+        self.log("train/loss", loss, prog_bar=True, logger=True, on_step=True, on_epoch=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -250,7 +250,7 @@ class GPT2(BaseModel):
             distributions = torch.distributions.categorical.Categorical(probabilities)
             next_tokens = distributions.sample().unsqueeze(1)
             batch = torch.concat(tensors=(batch, next_tokens), dim=1)
-            ended = batch[:, -1] == self.end_token 
+            ended = batch[:, -1] == self.end_token
             samples += [sample for sample in batch[ended]]
             batch = batch[~ended]
         return samples
