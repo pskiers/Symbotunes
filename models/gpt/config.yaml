@@ -3,9 +3,9 @@ model:
   params:
     n_vocab: 137 # vocabulary size
     n_ctx: 1955 # context size
-    n_embd: 768 # embedding size #768 600
+    n_embd: 600 # embedding size #768 600
     n_head: 12 # number of attention heads
-    n_layer: 12 # number of laters in the model
+    n_layer: 12 # number of layers in the model
     lr: 0.002
     lr_decay: 0.97
     lr_decay_start: 20
@@ -19,7 +19,7 @@ dataloaders:
     data_type: "tokenized_ABC"
     transforms:
       - folk_rnn:
-    
+
     batch_size: 16
     num_workers: 4
     collate_fn: "pad_collate_single_sequence"
@@ -33,7 +33,7 @@ dataloaders:
         data_type: "tokenized_ABC"
         transforms:
           - folk_rnn:
-        
+
         batch_size: 4
         num_workers: 4
         collate_fn: "pad_collate_single_sequence"
@@ -41,7 +41,7 @@ dataloaders:
 lightning:
   trainer:
     benchmark: True
-    max_epochs: 100
+    max_epochs: 150
     accumulate_grad_batches: 128
     # gradient_clip_algorithm: "value"
     # gradient_clip_val: 5

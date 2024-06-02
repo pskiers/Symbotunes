@@ -3,11 +3,12 @@ import copy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import pytorch_lightning as pl
 from ..base import BaseModel
+
 
 def gelu(x):
     return 0.5 * x * (1 + torch.tanh(np.sqrt(2 / np.pi) * (x + 0.044715 * torch.pow(x, 3))))
+
 
 class Norm(nn.Module):
     def __init__(self, n_state, epsilon=1e-5):
@@ -21,6 +22,7 @@ class Norm(nn.Module):
         s = (x - u).pow(2).mean(-1, keepdim=True)
         x = (x - u) / torch.sqrt(s + self.epsilon)
         return x * self.g + self.b
+
 
 class Conv1D(nn.Module):
     def __init__(self, nf, nx):
@@ -36,6 +38,7 @@ class Conv1D(nn.Module):
         x = torch.addmm(self.b, x.view(-1, x.size(-1)), self.w)
         x = x.view(*size_out)
         return x
+
 
 class MultiheadAttention(nn.Module):
     def __init__(self, nx, n_ctx, n_head, scale=False):
@@ -87,13 +90,14 @@ class MultiheadAttention(nn.Module):
         if self.scale:
             w = w / (v.size(-1))
         nd, ns = w.size(-2), w.size(-1)
-        b = self.bias[:, :, ns - nd:ns, :ns]
+        b = self.bias[:, :, ns - nd : ns, :ns]
         w = w * b - 1e10 * (1 - b)
         if attn_mask is not None:
             w = w + attn_mask
         w = F.softmax(w, dim=-1)
         a = torch.matmul(w, v)
         return a
+
 
 class MLP(nn.Module):
     def __init__(self, n_state, n_embd):
@@ -108,6 +112,7 @@ class MLP(nn.Module):
         h2 = self.c_proj(h)
         return h2
 
+
 class Block(nn.Module):
     def __init__(self, n_ctx, n_embd, n_head, scale=False):
         super(Block, self).__init__()
@@ -118,16 +123,16 @@ class Block(nn.Module):
         self.ln_2 = Norm(nx)
 
     def forward(self, x, layer_past=None, attn_mask=None):
-        nx = x.shape[-1]
         a, present = self.attn(self.ln_1(x), layer_past, attn_mask)
         x = x + a
         m = self.mlp(self.ln_2(x))
         x = x + m
         return x, present
 
+
 class GPT2(BaseModel):
     def __init__(
-        self, 
+        self,
         n_vocab,
         n_ctx,
         n_embd,
@@ -156,19 +161,19 @@ class GPT2(BaseModel):
         block = Block(self.n_ctx, self.n_embd, self.n_head, scale=True)
         self.h = nn.ModuleList([copy.deepcopy(block) for _ in range(self.n_layer)])
         self.ln_f = Norm(self.n_embd)
-        n_hidden = 2*n_vocab
+        n_hidden = 2 * n_vocab
         self.ll = nn.Linear(n_embd, n_hidden)
         self.ll2 = nn.Linear(n_hidden, n_vocab)
 
         self.start_token = start_token
         self.end_token = end_token
 
-    def set_embeddings_weights(self, model_embeddings_weights): # ?
+    def set_embeddings_weights(self, model_embeddings_weights):
         embed_shape = model_embeddings_weights.shape
         self.decoder = nn.Linear(embed_shape[1], embed_shape[0], bias=False)
         self.decoder.weight = model_embeddings_weights
 
-    def forward(self, input_ids, position_ids=None, token_type_ids=None, past=None):
+    def forward(self, input_ids, position_ids=None, past=None):
 
         if past is None:
             past_length = 0
@@ -177,7 +182,9 @@ class GPT2(BaseModel):
             past_length = past[0][0].size(-2)
 
         if position_ids is None:
-            position_ids = torch.arange(past_length, input_ids.size(-1) + past_length, dtype=torch.long, device=input_ids.device)
+            position_ids = torch.arange(
+                past_length, input_ids.size(-1) + past_length, dtype=torch.long, device=input_ids.device
+            )
             position_ids = position_ids.unsqueeze(0).expand_as(input_ids)
 
         input_shape = input_ids.size()
@@ -187,11 +194,7 @@ class GPT2(BaseModel):
         input_embeds = self.wte(input_ids)
         position_embeds = self.wpe(position_ids)
 
-        if token_type_ids is not None:
-            token_type_ids = token_type_ids.view(-1, token_type_ids.size(-1))
-            token_type_embeds = self.wte(token_type_ids)
-        else:
-            token_type_embeds = 0
+        token_type_embeds = 0
 
         hidden_states = input_embeds + position_embeds + token_type_embeds
 
@@ -216,11 +219,11 @@ class GPT2(BaseModel):
         mask = mask[:, 1:]
         out, _ = self(x)
         d1, d2, d3 = out.shape
-        out = out[:, :-1, :].reshape(d1*(d2-1), d3)
+        out = out[:, :-1, :].reshape(d1 * (d2 - 1), d3)
         y = y.flatten()
-        loss = F.cross_entropy(out, y, reduction='none')
-        loss = loss.view(d1, d2-1)
-        loss = loss*mask
+        loss = F.cross_entropy(out, y, reduction="none")
+        loss = loss.view(d1, d2 - 1)
+        loss = loss * mask
         loss = loss.mean()
         return loss
 
