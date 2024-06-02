@@ -3,7 +3,7 @@ model:
   params:
     lr: 0.001
     kl_weight: 0.2
-    use_teacher_forcing: False
+    use_teacher_forcing: True
     encoder_config:
       input_size: 137
       z_size: 512

@@ -60,7 +60,7 @@ class Decoder(nn.Module):
     ) -> None:
         super().__init__(*args, **kwargs)
         self.num_subsequences = num_subsequences
-        self.notes_per_subsequence = notes_per_subsequence
+        self.n_per_subseq = notes_per_subsequence
         self.total_notes = num_subsequences * notes_per_subsequence
         self.num_tokens = num_tokens
         self.z_size = z_size
@@ -108,7 +108,7 @@ class Decoder(nn.Module):
 
             if x is None:
                 note = torch.zeros(batch_size, self.num_tokens, device=z.device)
-                for i in range(self.notes_per_subsequence):
+                for i in range(self.n_per_subseq):
                     lstm_in = torch.cat([decoder_in, note], dim=-1)
                     lstm_in = lstm_in.unsqueeze(1)
 
@@ -116,37 +116,21 @@ class Decoder(nn.Module):
                     out = out.squeeze(1)
                     out = self.linear_out(out)
                     note = F.softmax(out, dim=1)
-                    notes[:, subsequence * self.notes_per_subsequence + i, :] = note
+                    notes[:, subsequence * self.n_per_subseq + i, :] = note
             else:
                 decoder_in = decoder_in.unsqueeze(1).repeat(1, 16, 1)
-                lstm_in = torch.cat(
-                    [
-                        decoder_in,
-                        x[
-                            :,
-                            range(
-                                subsequence * self.notes_per_subsequence,
-                                (subsequence + 1) * self.notes_per_subsequence,
-                            ),
-                            :,
-                        ],
-                    ],
-                    dim=-1,
-                )
+
+                sequence_x = x[:, subsequence * self.n_per_subseq + 1 : (subsequence + 1) * self.n_per_subseq]
+                first_token = torch.zeros(sequence_x.shape[0], 1, sequence_x.shape[2], device=sequence_x.device)
+                sequence_x = torch.cat([first_token, sequence_x], dim=1)
+
+                lstm_in = torch.cat([decoder_in, sequence_x], dim=-1)
 
                 out, (decoder_h, decoder_c) = self.decoder_lstm(lstm_in, (decoder_h, decoder_c))
 
                 out = self.linear_out(out)
-                out = torch.softmax(out, dim=-1)
 
-                notes[
-                    :,
-                    range(
-                        subsequence * self.notes_per_subsequence,
-                        (subsequence + 1) * self.notes_per_subsequence,
-                    ),
-                    :,
-                ] = out
+                notes[:, subsequence * self.n_per_subseq : (subsequence + 1) * self.n_per_subseq] = out
 
         return notes
 
@@ -180,7 +164,6 @@ class MusicVae(BaseModel):
         mu, log_var = self.encoder(x)
         sigma = torch.exp(log_var * 2)
         z = self.encoder.reparametrisation_trick(mu, log_var)
-        # z = torch.zeros(z.shape, device=z.device)
         if self.use_teacher_forcing:
             out = self.decoder(z, x)
         else:
