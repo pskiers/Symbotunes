@@ -2,7 +2,8 @@ from typing import Callable
 from torchvision import transforms  # type: ignore[import]
 from .folk_rnn import FolkTransform
 from .file_loaders import LoadMIDI
-from .lakh import LakhTransform
+from .midi_transforms import MidiTokenizer, MusicVAETokenizer, SampleBars, TokSequenceToTensor
+from .sample_subsequence import SampleSubsequence
 
 
 # fmt: off
@@ -21,7 +22,15 @@ def parse_transform(name: str, kwargs: dict) -> Callable:
             return FolkTransform(**kwargs)
         case "load_midi":
             return LoadMIDI(**kwargs)
-        case "lakh":
-            return LakhTransform()
+        case "midi_tokenizer":
+            return MidiTokenizer(**kwargs)
+        case "music_vae_tokenizer":
+            return MusicVAETokenizer()
+        case "sample_bars":
+            return SampleBars(**kwargs)
+        case "toksequence_to_tensor":
+            return TokSequenceToTensor()
+        case "sample_subsequence":
+            return SampleSubsequence(**kwargs)
         case _:
             raise NotImplementedError()
