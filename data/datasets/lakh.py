@@ -3,6 +3,7 @@ import tarfile
 from typing import Callable
 from mido import MidiFile, MidiTrack, MetaMessage
 import torch
+from tqdm import tqdm
 
 from .base import BaseDataset
 from .utils.downloader import Downloader, DownloadError
@@ -28,9 +29,6 @@ class LakhMidiDataset(BaseDataset):
     ) -> None:
         super().__init__(root, split, download, replace_if_exists, transform, target_transform, **kwargs)
 
-        self.data = []  # type: ignore[assignment]
-        # self.targets = []  # type: ignore[assignment]
-
         if preload:
             self._load_data()
 
@@ -43,21 +41,15 @@ class LakhMidiDataset(BaseDataset):
         return file_list
 
     def _load_data(self):
-        # self._targets = []
-        self._data = self._load_midi_paths(os.path.join(self.root, "train", "lmd_full"))
-        # handle targets
+        self.data = self._load_midi_paths(os.path.join(self.root, "train", "lmd_full"))
 
     def __getitem__(self, index: int) -> torch.Tensor:
         midi_data = self.data[index]
 
-        # target = self._targets[index]
-
         if self.transform:
             midi_data = self.transform(midi_data)
-        # if self.target_transform:
-        #     target = self.target_transform(target)9
 
-        return torch.Tensor(midi_data)  # type: ignore[return-value]
+        return midi_data  # type: ignore[return-value]
 
     def __len__(self) -> int:
         return len(self.data)
@@ -114,7 +106,7 @@ class LakhMidiDataset(BaseDataset):
         midi_full_path = os.path.join(midi_directory, midi_filename)
         try:
             midi = MidiFile(midi_full_path)
-        except OSError:  # Corrupted MIDI file
+        except Exception:  # Corrupted MIDI file
             return
 
         channel_tracks = {}
@@ -173,14 +165,14 @@ class LakhMidiDataset(BaseDataset):
 
         print("Removing drums...")
         file_list = []
-        for root, _, files in os.walk(dataset_path):
+        for root, _, files in tqdm(os.walk(dataset_path)):
             for file in files:
                 file_list.append((root, file))
         print("Splitting tracks by channel...")
-        for root, file in file_list:
+        for root, file in tqdm(file_list):
             self._split_tracks(root, file)
         print("Removing empty bars...")
-        for root, _, files in os.walk(dataset_path):
+        for root, _, files in tqdm(os.walk(dataset_path)):
             for file in files:
                 full_path = os.path.join(root, file)
                 if "_" in file:
