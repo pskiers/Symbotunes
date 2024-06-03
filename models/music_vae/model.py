@@ -93,7 +93,7 @@ class Decoder(nn.Module):
         out = F.tanh(out)
         out = out.view(out.shape[0], self.conductor_num_layers, -1).permute(1, 0, 2)
         hidden_conductor = torch.chunk(out, chunks=2, dim=-1)
-        hidden_conductor = hidden_conductor[0].contiguous(), hidden_conductor[1].contiguous()
+        hidden_conductor = [hidden_conductor[0].contiguous(), hidden_conductor[1].contiguous()]
         conductor_in = torch.zeros(
             batch_size, 1, self.conductor_in, device=z.device
         )  # conductor produces embeddings by processing the encoder state z recursively - the input is always zero
@@ -170,19 +170,30 @@ class MusicVae(BaseModel):
             out = self.decoder(z)
         return out, mu, sigma
 
-    def _step(self, batch) -> torch.Tensor:
-        x = nn.functional.one_hot(batch, num_classes=self.decoder.num_tokens).float()
+    def _step(self, batch) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        inputs, lengths = batch
+        inputs = inputs.long()
+
+        mask = torch.arange(inputs.size(1), device=lengths.device).expand(len(lengths), inputs.size(1)) < lengths.unsqueeze(1)
+        x = nn.functional.one_hot(inputs, num_classes=self.decoder.num_tokens).float()
+
         out, mu, sigma = self(x)
+
         out = out.reshape(-1, self.decoder.num_tokens)
-        targets = batch.view(-1)
+        targets = inputs.view(-1)
+        mask = mask.reshape(-1)
+        
+        out = out[mask]
+        targets = targets[mask]
+
         recon_loss = F.cross_entropy(out, targets)
 
         n_mu = torch.tensor([0], device=self.device)
         n_sigma = torch.tensor([1], device=self.device)
-
         p = Normal(n_mu, n_sigma)
         q = Normal(mu, sigma)
         kl_div = kl_divergence(q, p).mean()
+
         elbo = torch.mean(recon_loss) + (self.kl_weight * kl_div)
         return elbo, recon_loss, kl_div
 

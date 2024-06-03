@@ -41,7 +41,7 @@ dataloaders:
           subsequence_len: 256
       - toksequence_to_tensor:
     
-    batch_size: 64
+    batch_size: 128
     num_workers: 16
     collate_fn: "pad_collate_single_sequence"
 
@@ -66,7 +66,7 @@ dataloaders:
               subsequence_len: 256
           - toksequence_to_tensor:
         
-        batch_size: 64
+        batch_size: 128
         num_workers: 16
         collate_fn: "pad_collate_single_sequence"
 
@@ -74,7 +74,7 @@ lightning:
   trainer:
     benchmark: True
     max_steps: 100000
-    # accumulate_grad_batches: 8
+    accumulate_grad_batches: 4
 
 callbacks:
   - model_checkpoint:
