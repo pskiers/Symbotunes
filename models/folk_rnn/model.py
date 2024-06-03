@@ -108,18 +108,17 @@ class FolkRNN(BaseModel):
 
     @torch.no_grad()
     def sample(self, batch_size: int) -> list[torch.Tensor]:
+        self.train()
         batch = torch.tensor([[self.start_token] for _ in range(batch_size)], device=self.device)
         lengths = torch.tensor([1 for _ in range(batch_size)], device=torch.device("cpu"))
         samples: list[torch.Tensor] = []
         while batch.shape[0] > 0:
             out = self(batch, lengths)
-            probabilities = torch.softmax(out[:, -1], dim=-1)
-            distributions = torch.distributions.categorical.Categorical(probabilities)
-            next_tokens = distributions.sample().unsqueeze(1)
+            next_tokens = out[:, -1].argmax(dim=1).unsqueeze(1)
             batch = torch.concat(tensors=(batch, next_tokens), dim=1)
             ended = batch[:, -1] == self.end_token
             samples += [sample for sample in batch[ended]]
             batch = batch[~ended]
+            lengths = lengths[~ended]
             lengths += 1
-            lengths = lengths[~ended.cpu()]
         return samples
