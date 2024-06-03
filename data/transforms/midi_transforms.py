@@ -24,7 +24,7 @@ class MidiTokenizer(object):
         self.max_tracks = max_tracks
 
     def __call__(self, path: str):
-        tokenized_midi = self.tokenizer(path)[:self.max_tracks]
+        tokenized_midi = self.tokenizer(path)[: self.max_tracks]
         return tokenized_midi[0] if len(tokenized_midi) == 1 else tokenized_midi
 
 

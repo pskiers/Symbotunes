@@ -1,5 +1,6 @@
 from random import randint
 
+
 class SampleSubsequence(object):
     def __init__(self, subsequence_len: int) -> None:
         self.subsequence_len = subsequence_len

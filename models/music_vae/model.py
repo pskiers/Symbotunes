@@ -174,7 +174,9 @@ class MusicVae(BaseModel):
         inputs, lengths = batch
         inputs = inputs.long()
 
-        mask = torch.arange(inputs.size(1), device=lengths.device).expand(len(lengths), inputs.size(1)) < lengths.unsqueeze(1)
+        mask = torch.arange(inputs.size(1), device=lengths.device).expand(
+            len(lengths), inputs.size(1)
+        ) < lengths.unsqueeze(1)
         x = nn.functional.one_hot(inputs, num_classes=self.decoder.num_tokens).float()
 
         out, mu, sigma = self(x)
@@ -182,7 +184,7 @@ class MusicVae(BaseModel):
         out = out.reshape(-1, self.decoder.num_tokens)
         targets = inputs.view(-1)
         mask = mask.reshape(-1)
-        
+
         out = out[mask]
         targets = targets[mask]
 
