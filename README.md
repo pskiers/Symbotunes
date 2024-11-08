@@ -7,7 +7,7 @@ The repository is a hub for models generating music in symbolic formats. Current
 * **GPT-2** - see https://aclanthology.org/2020.nlp4musa-1.10.pdf
 
 ## Environment setup
-Hub uses Anaconda for package management, which can be installed from [here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html). 
+Hub uses Anaconda for package management, which can be installed from [here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html).
 
 The following command can be used to create the environment from file:
 ```sh
@@ -27,7 +27,7 @@ conda env export --name wimu | grep -v "prefix: " > environment.yml
 ## Training models from scratch
 To train model from scratch run the following command:
 ```sh
-python3 -m scripts.train -p CONFIG_FILE 
+python3 -m scripts.train -p CONFIG_FILE
 ```
 where `CONFIG_FILE` is a path to config file of the model you want to train
 
@@ -44,6 +44,13 @@ To sample from a model run:
 python3 -m scripts.sample -p CONFIG_FILE -c CKPT_PATH -b BS -o OUT
 ```
 where `BS` is the number of samples you want to generate and `OUT` is a path to directory the samples should be saved to
+
+For instance, you can produce 4 MIDI clips with a pre-trained Folk-RNN by simply calling:
+
+```sh
+python3 -m scripts.sample -p models/folk_rnn/configs/config.yaml -c models/folk_rnn/checkpoints/checkpoint.ckpt --batch 4 -o ./results
+
+```
 
 ## Config file structure
 One of the fundamental parts of this project is our custom configuration file parser. It allows us to run different experiments with a single python script, by simply changing the configuration file. The expected structure of the config file looks as follows:
@@ -72,7 +79,7 @@ dataloaders:
       - transform_name2:                                        # if we want to pass no params to transform we still need to add the ":"
       ...                                                       # other transforms
 
-    
+
     batch_size: 128                                             # dataloader batch size
     num_workers: 16                                             # dataloader number of workers
     collate_fn: "pad_collate_single_sequence"                   # dataloader collate function
@@ -90,7 +97,7 @@ dataloaders:
         - transform_name2:                                      # if we want to pass no params to transform we still need to add the ":"
         ...                                                     # other transforms
 
-        
+
         batch_size: 128                                         # dataloader batch size
         num_workers: 16                                         # dataloader number of workers
         collate_fn: "pad_collate_single_sequence"               # dataloader collate function
@@ -120,8 +127,8 @@ Implementation of this parser is in the `__init__.py` files: [model section pars
     * **folk-rnn** - folk music in ABC format, see https://arxiv.org/pdf/1604.08723.pdf
 * **dataset -> transforms**:
     * **folk_rnn** - tokenizer for ABC format, as described in https://arxiv.org/pdf/1604.08723.pdf, takes string as input, outputs tokenized sequence
-    * **midi_tokenizer** - generic miditok REMI midi file tokenizer, takes path to midi file as input, outputs miditok TokSequence 
-    * **music_vae_tokenizer** - midi tokenizer for MusicVAE model, takes path to midi file as input, outputs miditok TokSequence 
+    * **midi_tokenizer** - generic miditok REMI midi file tokenizer, takes path to midi file as input, outputs miditok TokSequence
+    * **music_vae_tokenizer** - midi tokenizer for MusicVAE model, takes path to midi file as input, outputs miditok TokSequence
     * **sample_bars** - samples n random bars (continous, one bar after another) from the given track. takes TokSequence as input and outputs n sampled bars or the original sequence if the track has less than n bars (as TokSequence)
     * **toksequence_to_tensor** - transforms TokSequence to pytorch Tensor, takes TokSequence as input and outputs pytorch Tensor
     * **sample_subsequence** - samples subsequence of given length from the given sequence (or return the sequence if the sequence is shorter than the expected subsequence)
