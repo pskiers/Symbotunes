@@ -49,7 +49,6 @@ For instance, you can produce 4 MIDI clips with a pre-trained Folk-RNN by simply
 
 ```sh
 python3 -m scripts.sample -p models/folk_rnn/configs/config.yaml -c models/folk_rnn/checkpoints/checkpoint.ckpt --batch 4 -o ./results
-
 ```
 
 ## Config file structure
