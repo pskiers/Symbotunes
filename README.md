@@ -7,7 +7,7 @@ The repository is a hub for models generating music in symbolic formats. Current
 * **GPT-2** - see https://aclanthology.org/2020.nlp4musa-1.10.pdf
 
 ## Environment setup
-Hub uses Anaconda for package management, which can be installed from [here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html).
+Hub uses Anaconda for package management, which can be installed from [here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html). We also uses `git lfs`, which can be installed from [here](https://docs.github.com/en/repositories/working-with-files/managing-large-files/installing-git-large-file-storage).
 
 The following command can be used to create the environment from file:
 ```sh
