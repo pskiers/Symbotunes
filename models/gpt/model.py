@@ -143,10 +143,10 @@ class GPT2(BaseModel):
         lr_decay_start: int = 20,
         start_token: int = 135,
         end_token: int = 136,
-        *args: torch.Any,
-        **kwargs: torch.Any
+        *args,
+        **kwargs
     ) -> None:
-        super(GPT2, self).__init__()
+        super().__init__(*args, **kwargs)
         self.n_vocab = n_vocab
         self.n_ctx = n_ctx
         self.n_embd = n_embd

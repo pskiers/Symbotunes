@@ -24,8 +24,8 @@ class FolkRNN(BaseModel):
         lr_decay_start: int = 20,
         start_token: int = 135,
         end_token: int = 136,
-        *args: torch.Any,
-        **kwargs: torch.Any,
+        *args,
+        **kwargs,
     ) -> None:
         super().__init__(*args, **kwargs)
 
@@ -119,6 +119,6 @@ class FolkRNN(BaseModel):
             ended = batch[:, -1] == self.end_token
             samples += [sample for sample in batch[ended]]
             batch = batch[~ended]
-            lengths = lengths[~ended]
+            lengths = lengths[~ended.cpu()]
             lengths += 1
         return samples

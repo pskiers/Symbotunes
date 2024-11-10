@@ -56,7 +56,7 @@ class Decoder(nn.Module):
         num_subsequences: int = 16,
         notes_per_subsequence: int = 16,
         *args,
-        **kwargs
+        **kwargs,
     ) -> None:
         super().__init__(*args, **kwargs)
         self.num_subsequences = num_subsequences
@@ -149,8 +149,8 @@ class MusicVae(BaseModel):
         lr_decay: float = 0.9999,
         kl_weight: float = 1.0,
         use_teacher_forcing: bool = True,
-        *args: torch.Any,
-        **kwargs: torch.Any
+        *args,
+        **kwargs,
     ) -> None:
         super().__init__(*args, **kwargs)
         self.lr = lr
